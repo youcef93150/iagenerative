@@ -272,30 +272,42 @@ class QuestionnaireManager:
         """
         text_parts = []
         
-        # Description principale (poids fort)
+        # SECTION 1: Genres préférés (convertis en texte descriptif)
+        genres_prefs = responses.get('preferences_genres', {})
+        top_genres = [genre for genre, score in sorted(genres_prefs.items(), key=lambda x: x[1], reverse=True) if score >= 4]
+        if top_genres:
+            text_parts.append(f"J'adore les films de {', '.join(top_genres)}.")
+        
+        # SECTION 2: Ambiances préférées (convertis en texte descriptif)
+        moods_prefs = responses.get('preferences_moods', {})
+        top_moods = [mood for mood, score in sorted(moods_prefs.items(), key=lambda x: x[1], reverse=True) if score >= 4]
+        if top_moods:
+            text_parts.append(f"Je recherche une ambiance {', '.join(top_moods)}.")
+        
+        # SECTION 3: Description principale (poids fort)
         if responses.get('description_libre'):
             text_parts.append(responses['description_libre'])
         
-        # Ajouter les réalisateurs favoris
+        # SECTION 4: Réalisateurs favoris
         if responses.get('realisateurs_favoris'):
             text_parts.append(f"Réalisateurs appréciés: {responses['realisateurs_favoris']}")
         
-        # Ajouter les films de référence
+        # SECTION 5: Films de référence
         if responses.get('films_references'):
             films_list = responses['films_references'].strip()
             if films_list:
                 text_parts.append(f"Films de référence: {films_list}")
         
-        # Ajouter les périodes préférées
+        # SECTION 6: Périodes préférées
         if responses.get('periode_preferee'):
             periodes_str = ", ".join(responses['periode_preferee'])
             text_parts.append(f"Périodes préférées: {periodes_str}")
         
-        # Éléments à éviter (avec contexte négatif)
+        # SECTION 7: Éléments à éviter (avec contexte négatif)
         if responses.get('elements_a_eviter'):
-            text_parts.append(f"Éléments à éviter: {responses['elements_a_eviter']}")
+            text_parts.append(f"Je n'aime pas: {responses['elements_a_eviter']}")
         
-        return " | ".join(text_parts)
+        return " ".join(text_parts)
     
     def get_genre_weights(self, responses: Dict) -> Dict[str, float]:
         """
