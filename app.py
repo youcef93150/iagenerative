@@ -1,26 +1,26 @@
 """
-🎬 AISCA-Cinema: Agent Intelligent de Recommandation Cinématographique
-Application Streamlit Principale
+Application principale de recommandation de films
+Interface Streamlit pour AISCA-Cinema
 
 Projet EFREI - IA Générative 2025-26
 RNCP40875 - Bloc 2
 
-Architecture RAG appliquée au domaine cinématographique.
-Adapte le framework AISCA (Cartographie des Compétences) pour la recommandation de films.
+Architecture RAG pour recommander des films
+Basé sur le framework AISCA adapté au cinéma
 """
 
 import streamlit as st
 import logging
 from pathlib import Path
 
-# Import des modules du projet
+# Imports des modules du projet
 from src.questionnaire import QuestionnaireManager
 from src.nlp_engine import NLPEngine
 from src.scoring import ScoringSystem
 from src.genai_integration import GenAIIntegration
 from src.visualization import VisualizationManager
 
-# Configuration du logging
+# Configuration des logs
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -74,18 +74,14 @@ def main():
     
     initialize_session_state()
     
-    # ============================================================
-    # EN-TÊTE
-    # ============================================================
+    # Section en-tete de la page
     st.markdown('<h1 class="main-header">🎬 AISCA-Cinema</h1>', unsafe_allow_html=True)
     st.markdown(
         '<p class="sub-header">Agent Intelligent Sémantique et Génératif de Recommandation Cinématographique</p>',
         unsafe_allow_html=True
     )
     
-    # ============================================================
-    # SIDEBAR - INFORMATIONS
-    # ============================================================
+    # Sidebar avec les infos du projet
     with st.sidebar:
         st.image("https://via.placeholder.com/300x100/FF6B6B/FFFFFF?text=AISCA-Cinema", width=300)
         
@@ -123,9 +119,7 @@ def main():
                 st.session_state.analysis_done = False
                 st.rerun()
     
-    # ============================================================
-    # ÉTAPE 1: QUESTIONNAIRE
-    # ============================================================
+    # Etape 1 - Affichage du questionnaire
     if not st.session_state.analysis_done:
         st.markdown("## 📝 Étape 1 : Questionnaire de Préférences")
         st.markdown("Complétez le questionnaire ci-dessous pour découvrir vos recommandations personnalisées.")
@@ -149,39 +143,39 @@ def main():
             else:
                 st.success(message)
                 
-                # Sauvegarder les réponses (EF1.2)
+                # Sauvegarder les reponses de l'utilisateur
                 questionnaire.save_responses(responses)
                 
-                # Stocker dans la session
+                # Stocker les reponses dans la session
                 st.session_state.responses = responses
                 
-                # Lancer l'analyse
+                # Lancer le processus d'analyse
                 with st.spinner("🔍 Analyse en cours... Veuillez patienter."):
                     try:
-                        # 1. Initialiser les composants
+                        # Etape 1 - Initialiser les composants necessaires
                         st.toast("🔧 Initialisation des composants...")
                         nlp_engine = NLPEngine()
                         scoring_system = ScoringSystem(alpha=0.50, beta=0.30, gamma=0.20)
                         genai = GenAIIntegration()
                         
-                        # 2. Charger le référentiel (EF2.1)
+                        # Etape 2 - Charger la base de donnees de films
                         st.toast("📚 Chargement du référentiel de films...")
                         csv_path = Path(__file__).parent / 'data' / 'films_referentiel.csv'
                         referentiel = nlp_engine.load_referentiel(str(csv_path))
                         
-                        # 3. Préparer le texte pour l'analyse
+                        # Etape 3 - Preparer le texte utilisateur pour l'analyse
                         user_text = questionnaire.get_text_for_analysis(responses)
                         
-                        # 4. (Optionnel) Enrichir si texte trop court (EF4.1)
+                        # Etape 4 - Enrichir le texte si trop court avec l'IA
                         user_text, was_enriched = genai.enrich_short_text(user_text, min_words=15)
                         if was_enriched:
                             st.toast("✨ Description enrichie par l'IA")
                         
-                        # 5. Analyse sémantique NLP (EF2)
+                        # Etape 5 - Analyse semantique avec SBERT
                         st.toast("🧠 Analyse sémantique avec SBERT...")
                         recommendations, similarities = nlp_engine.analyze_user_input(user_text, top_n=3)
                         
-                        # 6. Calcul des scores pondérés (EF3.1)
+                        # Etape 6 - Calculer les scores ponderes
                         st.toast("🎯 Calcul des scores finaux...")
                         genre_weights = questionnaire.get_genre_weights(responses)
                         mood_weights = questionnaire.get_mood_weights(responses)
@@ -194,10 +188,10 @@ def main():
                             referentiel=referentiel
                         )
                         
-                        # 7. Top 3 (EF3.2)
+                        # Etape 7 - Recuperer le top 3 des films
                         top_3 = scoring_system.get_top_recommendations(ranked_recommendations, top_n=3)
                         
-                        # 8. Statistiques
+                        # Etape 8 - Calculer les statistiques
                         coverage_stats = nlp_engine.get_coverage_stats(similarities)
                         genre_distribution = nlp_engine.get_genre_distribution(similarities, threshold=0.5)
                         coverage_score = scoring_system.calculate_coverage_score(
@@ -205,19 +199,19 @@ def main():
                         )
                         weak_genres = scoring_system.identify_weak_genres(similarities, referentiel, threshold=0.4)
                         
-                        # 9. Génération IA (EF4)
+                        # Etape 9 - Generation avec l'IA Gemini
                         st.toast("🤖 Génération du profil et du plan...")
                         
-                        # Plan de découverte (EF4.2 - UN SEUL APPEL)
+                        # Generer le plan de decouverte avec 1 seul appel API
                         user_profile_summary = f"Genres préférés: {', '.join([g for g, w in sorted(genre_weights.items(), key=lambda x: x[1], reverse=True)[:3]])}. Moods: {', '.join([m for m, w in sorted(mood_weights.items(), key=lambda x: x[1], reverse=True)[:3]])}."
                         discovery_plan = genai.generate_discovery_plan(weak_genres, top_3, user_profile_summary)
                         
-                        # Profil cinéphile (EF4.3 - UN SEUL APPEL)
+                        # Generer le profil cinephile avec 1 seul appel API
                         cinephile_profile = genai.generate_cinephile_profile(
                             top_3, genre_weights, mood_weights, coverage_score
                         )
                         
-                        # Stocker les résultats
+                        # Sauvegarder tous les resultats
                         st.session_state.recommendations = {
                             'top_3': top_3,
                             'all_recommendations': ranked_recommendations,
@@ -241,9 +235,7 @@ def main():
                         st.error(f"❌ Erreur lors de l'analyse: {str(e)}")
                         logger.error(f"Erreur analyse: {e}", exc_info=True)
     
-    # ============================================================
-    # ÉTAPE 2: RÉSULTATS
-    # ============================================================
+    # Etape 2 - Affichage des resultats
     else:
         viz = VisualizationManager()
         results = st.session_state.recommendations
@@ -252,7 +244,7 @@ def main():
         st.markdown("## 🎯 Vos Recommandations Personnalisées")
         st.markdown("---")
         
-        # Tabs pour organiser les résultats
+        # Organiser les resultats en onglets
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
             "🏆 Top 3 Films",
             "📊 Visualisations",
@@ -261,14 +253,14 @@ def main():
             "⚙️ Statistiques"
         ])
         
-        # TAB 1: Top 3 Films
+        # Onglet 1 - Les 3 meilleurs films recommandes
         with tab1:
             st.markdown("### 🏆 Vos 3 Films Recommandés")
             
             for film in results['top_3']:
                 viz.display_film_card(film, film['rang'])
         
-        # TAB 2: Visualisations
+        # Onglet 2 - Graphiques et visualisations
         with tab2:
             st.markdown("### 📊 Analyse Visuelle de votre Profil")
             
@@ -287,7 +279,7 @@ def main():
             st.markdown("### 📈 Statistiques de Couverture")
             viz.display_coverage_stats(results['coverage_stats'])
         
-        # TAB 3: Profil Cinéphile
+        # Onglet 3 - Profil personnalise genere par l'IA
         with tab3:
             st.markdown("### 🎭 Votre Profil Cinéphile")
             st.info("Généré par l'IA Gemini (1 appel API - EF4.3)")
@@ -297,7 +289,7 @@ def main():
             st.markdown("---")
             st.markdown(f"**Score d'Affinité Global:** {results['coverage_score']:.1%}")
             
-            # Interprétation
+            # Interpreter le score pour l'utilisateur
             if results['coverage_score'] >= 0.7:
                 st.success("🌟 Excellent ! Vos goûts sont très bien définis.")
             elif results['coverage_score'] >= 0.5:
@@ -305,7 +297,7 @@ def main():
             else:
                 st.warning("🔍 Profil varié ! Vous êtes ouvert à de nombreux styles.")
         
-        # TAB 4: Plan de Découverte
+        # Onglet 4 - Plan de decouverte personnalise
         with tab4:
             st.markdown("### 📚 Plan de Découverte Personnalisé")
             st.info("Généré par l'IA Gemini (1 appel API - EF4.2)")
@@ -319,7 +311,7 @@ def main():
                     with cols[idx]:
                         st.metric(f"Genre #{idx+1}", genre)
         
-        # TAB 5: Statistiques
+        # Onglet 5 - Details techniques et statistiques
         with tab5:
             st.markdown("### ⚙️ Détails Techniques de l'Analyse")
             
@@ -360,9 +352,7 @@ Où tous les scores sont normalisés dans [0, 1]
                 ])
                 st.dataframe(df_scores, use_container_width=True)
     
-    # ============================================================
-    # FOOTER
-    # ============================================================
+    # Footer de la page
     st.markdown("---")
     st.markdown(
         """

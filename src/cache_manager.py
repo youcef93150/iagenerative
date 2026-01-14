@@ -1,6 +1,6 @@
 """
 Gestionnaire de Cache pour les appels GenAI
-EF4 - Contrainte obligatoire : Implémentation d'un caching automatique
+Contrainte obligatoire : Implémentation d'un caching automatique
 
 Objectif : Limiter les coûts API et respecter le Free Tier de Gemini
 """
@@ -40,7 +40,7 @@ class CacheManager:
         self.max_size = max_size
         self.cache = self._load_cache()
         
-        logger.info(f"✅ CacheManager initialisé - Enabled: {enabled}, Max size: {max_size}")
+        logger.info(f" CacheManager initialisé - Enabled: {enabled}, Max size: {max_size}")
         
     def _load_cache(self) -> Dict:
         """Charge le cache depuis le fichier"""
@@ -51,10 +51,10 @@ class CacheManager:
             try:
                 with open(self.cache_file, 'r', encoding='utf-8') as f:
                     cache_data = json.load(f)
-                    logger.info(f"📂 Cache chargé: {len(cache_data)} entrées")
+                    logger.info(f" Cache chargé: {len(cache_data)} entrées")
                     return cache_data
             except Exception as e:
-                logger.warning(f"⚠️ Erreur lors du chargement du cache: {e}")
+                logger.warning(f" Erreur lors du chargement du cache: {e}")
                 return {}
         return {}
     
@@ -66,9 +66,9 @@ class CacheManager:
         try:
             with open(self.cache_file, 'w', encoding='utf-8') as f:
                 json.dump(self.cache, f, ensure_ascii=False, indent=2)
-            logger.debug(f"💾 Cache sauvegardé: {len(self.cache)} entrées")
+            logger.debug(f" Cache sauvegardé: {len(self.cache)} entrées")
         except Exception as e:
-            logger.error(f"❌ Erreur lors de la sauvegarde du cache: {e}")
+            logger.error(f" Erreur lors de la sauvegarde du cache: {e}")
     
     def _generate_key(self, prompt: str, model: str = "gemini") -> str:
         """
@@ -102,9 +102,9 @@ class CacheManager:
         response = self.cache.get(key)
         
         if response:
-            logger.info(f"✅ Cache HIT - Réponse trouvée (longueur prompt: {len(prompt)} caractères)")
+            logger.info(f" Cache HIT - Réponse trouvée (longueur prompt: {len(prompt)} caractères)")
         else:
-            logger.info(f"❌ Cache MISS - Nouvel appel API nécessaire")
+            logger.info(f" Cache MISS - Nouvel appel API nécessaire")
             
         return response
     
@@ -130,7 +130,7 @@ class CacheManager:
         
         self.cache[key] = response
         self._save_cache()
-        logger.info(f"💾 Réponse ajoutée au cache (total: {len(self.cache)}/{self.max_size} entrées)")
+        logger.info(f" Réponse ajoutée au cache (total: {len(self.cache)}/{self.max_size} entrées)")
     
     def clear(self):
         """Vide le cache complètement"""

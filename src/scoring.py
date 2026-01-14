@@ -1,13 +1,13 @@
 """
 Système de Scoring et Recommandation
-EF3: Système de Scoring et Recommandation
+Système de Scoring et Recommandation
 
-Implémente la formule de score pondérée combinant:
+Implemente la formule de score pondérée combinant:
 - Score sémantique (SBERT similarité cosinus)
 - Score de genres (préférences Likert)
 - Score de moods (préférences Likert)
 
-Équivalent AISCA: calcul du score de couverture des compétences
+Equivalent AISCA: calcul du score de couverture des compétences
 """
 
 import numpy as np
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class ScoringSystem:
     """
-    Système de scoring pour la recommandation de films (EF3)
+    Système de scoring pour la recommandation de films ()
     
     Adapte la formule de scoring d'AISCA au domaine cinématographique.
     """
@@ -32,7 +32,7 @@ class ScoringSystem:
         gamma: float = 0.20   # Poids des préférences de mood
     ):
         """
-        Initialise le système de scoring avec les pondérations (EF3.1)
+        Initialise le système de scoring avec les pondérations (1)
         
         Formule (équivalent AISCA):
         Score_Final = α × Score_Sémantique + β × Score_Genres + γ × Score_Moods
@@ -45,7 +45,7 @@ class ScoringSystem:
         # Vérifier que les poids somment à 1.0
         total_weight = alpha + beta + gamma
         if not np.isclose(total_weight, 1.0):
-            logger.warning(f"⚠️ Les poids ne somment pas à 1.0 ({total_weight}). Normalisation automatique.")
+            logger.warning(f" Les poids ne somment pas à 1.0 ({total_weight}). Normalisation automatique.")
             alpha = alpha / total_weight
             beta = beta / total_weight
             gamma = gamma / total_weight
@@ -54,7 +54,7 @@ class ScoringSystem:
         self.beta = beta
         self.gamma = gamma
         
-        logger.info(f"✅ ScoringSystem initialisé - α={alpha:.2f}, β={beta:.2f}, γ={gamma:.2f}")
+        logger.info(f" ScoringSystem initialisé - α={alpha:.2f}, β={beta:.2f}, γ={gamma:.2f}")
     
     def calculate_genre_score(
         self,
@@ -133,7 +133,7 @@ class ScoringSystem:
         mood_score: float
     ) -> float:
         """
-        Calcule le score final pondéré (EF3.1 - Formule de Score)
+        Calcule le score final pondéré (1 - Formule de Score)
         
         Formule:
         Score_Final = α × Sim_Sémantique + β × Score_Genre + γ × Score_Mood
@@ -178,7 +178,7 @@ class ScoringSystem:
         Returns:
             Liste des recommandations enrichies et reclassées
         """
-        logger.info("🔄 Calcul des scores finaux pondérés...")
+        logger.info(" Calcul des scores finaux pondérés...")
         
         enriched_recs = []
         
@@ -221,7 +221,7 @@ class ScoringSystem:
         for idx, rec in enumerate(enriched_recs):
             rec['rang'] = idx + 1
         
-        logger.info(f"✅ Scores calculés et films reclassés")
+        logger.info(f" Scores calculés et films reclassés")
         top_scores = [f"{r['score_final']:.3f}" for r in enriched_recs[:3]]
         logger.info(f"🏆 Top 3 scores finaux: {top_scores}")
         
@@ -233,7 +233,7 @@ class ScoringSystem:
         top_n: int = 3
     ) -> List[Dict]:
         """
-        Retourne les top N recommandations (EF3.2)
+        Retourne les top N recommandations (2)
         
         Args:
             ranked_films: Liste des films classés
@@ -254,13 +254,13 @@ class ScoringSystem:
         """
         Calcule un score de couverture global du profil utilisateur
         
-        Équivalent AISCA: Coverage Score des compétences
+        Equivalent AISCA: Coverage Score des compétences
         
         Args:
             semantic_similarities: Toutes les similarités sémantiques
             user_genre_weights: Poids des genres
             user_mood_weights: Poids des moods
-            referentiel: Référentiel de films
+            referentiel: Referentiel de films
             
         Returns:
             Score de couverture global [0, 1]
@@ -287,7 +287,7 @@ class ScoringSystem:
         
         coverage_score = float(np.average(scores, weights=weights))
         
-        logger.info(f"📊 Score de couverture global: {coverage_score:.3f}")
+        logger.info(f" Score de couverture global: {coverage_score:.3f}")
         
         return coverage_score
     
@@ -300,11 +300,11 @@ class ScoringSystem:
         """
         Identifie les genres faiblement couverts par le profil utilisateur
         
-        Équivalent AISCA: compétences à développer (gaps)
+        Equivalent AISCA: compétences à développer (gaps)
         
         Args:
             semantic_similarities: Array des similarités
-            referentiel: Référentiel de films
+            referentiel: Referentiel de films
             threshold: Seuil de similarité faible
             
         Returns:

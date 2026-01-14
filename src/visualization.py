@@ -33,7 +33,7 @@ class VisualizationManager:
     def plot_genre_radar(
         self,
         genre_weights: Dict[str, float],
-        title: str = "🎭 Vos Préférences par Genre"
+        title: str = " Vos Préférences par Genre"
     ):
         """
         Crée un graphique radar des préférences de genre
@@ -80,7 +80,7 @@ class VisualizationManager:
     def plot_mood_radar(
         self,
         mood_weights: Dict[str, float],
-        title: str = "🎨 Vos Préférences d'Ambiance"
+        title: str = " Vos Préférences d'Ambiance"
     ):
         """
         Crée un graphique radar des préférences de mood
@@ -127,7 +127,7 @@ class VisualizationManager:
     def plot_recommendation_scores(
         self,
         recommendations: List[Dict],
-        title: str = "🎯 Scores des Recommandations"
+        title: str = " Scores des Recommandations"
     ):
         """
         Affiche les scores des films recommandés
@@ -186,7 +186,7 @@ class VisualizationManager:
     def plot_genre_distribution(
         self,
         genre_scores: Dict[str, float],
-        title: str = "📊 Distribution de l'Affinité par Genre"
+        title: str = " Distribution de l'Affinité par Genre"
     ):
         """
         Affiche la distribution des affinités par genre
@@ -231,7 +231,7 @@ class VisualizationManager:
         """
         # Émojis de médailles
         medals = {1: "🥇", 2: "🥈", 3: "🥉"}
-        medal = medals.get(rank, "🎬")
+        medal = medals.get(rank, "")
         
         with st.container():
             st.markdown(f"### {medal} #{rank} - {film['titre']}")
@@ -304,7 +304,7 @@ class VisualizationManager:
         Args:
             api_stats: Statistiques de l'API
         """
-        st.markdown("### 📊 Utilisation de l'API GenAI")
+        st.markdown("###  Utilisation de l'API GenAI")
         
         col1, col2, col3 = st.columns(3)
         

@@ -1,18 +1,16 @@
 """
-Intégration de l'IA Générative (Gemini)
-EF4: Augmentation par GenAI (Stratégique et Limitée)
+Module pour utiliser l'IA Gemini de Google
+Genere du texte personnalise pour l'utilisateur
 
-Contraintes obligatoires respectées:
-- Appels API strictement limités
-- Un seul appel pour le plan de découverte
-- Un seul appel pour la bio/synthèse
-- Caching automatique
-- Enrichissement conditionnel uniquement
+Contraintes respectees:
+- Maximum 2-3 appels API par session
+- Utilise un cache pour eviter les appels repetitifs
+- Enrichit le texte utilisateur seulement si necessaire
 
-Architecture RAG:
-- Retrieval: Fait par le moteur NLP
-- Augmented Context: Construction du contexte enrichi ici
-- Generation: Production via Gemini
+Architecture:
+- Recuperation: Faite par le moteur NLP
+- Contexte enrichi: Preparation des donnees ici
+- Generation: Production de texte avec Gemini
 """
 
 import os
@@ -30,9 +28,8 @@ logger = logging.getLogger(__name__)
 
 class GenAIIntegration:
     """
-    Intégration de l'IA générative Gemini (EF4)
-    
-    Respecte l'architecture RAG et toutes les contraintes de limitation des appels.
+    Classe pour integrer l'IA Gemini dans l'application
+    Gere les appels API et le cache pour limiter les couts
     """
     
     def __init__(
@@ -43,61 +40,61 @@ class GenAIIntegration:
         max_cache_size: int = 100
     ):
         """
-        Initialise l'intégration Gemini
+        Initialisation du module Gemini
         
         Args:
-            api_key: Clé API Gemini (ou depuis .env)
-            model_name: Nom du modèle Gemini à utiliser
-            cache_enabled: Activer le caching
-            max_cache_size: Taille max du cache
+            api_key: Cle API Gemini (ou chargee depuis le fichier .env)
+            model_name: Nom du modele Gemini a utiliser
+            cache_enabled: Active ou non le cache
+            max_cache_size: Nombre max d'entrees dans le cache
         """
-        # Récupérer la clé API
+        # Recuperer la cle API depuis l'environnement
         self.api_key = api_key or os.getenv('GEMINI_API_KEY')
         
         if not self.api_key:
             raise ValueError(
-                "❌ Clé API Gemini manquante. "
-                "Définissez GEMINI_API_KEY dans .env ou passez-la en paramètre."
+                "Cle API Gemini manquante. "
+                "Ajoutez GEMINI_API_KEY dans le fichier .env"
             )
         
-        # Configurer Gemini
+        # Configurer l'API Gemini
         genai.configure(api_key=self.api_key)
         self.model_name = model_name
         self.model = genai.GenerativeModel(model_name)
         
-        # Initialiser le cache (CONTRAINTE OBLIGATOIRE)
+        # Initialiser le systeme de cache
         self.cache = CacheManager(
             cache_dir=".cache",
             max_size=max_cache_size,
             enabled=cache_enabled
         )
         
-        # Compteur d'appels (pour monitoring)
+        # Compteur pour suivre le nombre d'appels API
         self.api_calls_count = 0
         
-        logger.info(f"✅ GenAI initialisé - Modèle: {model_name}, Cache: {cache_enabled}")
+        logger.info(f"GenAI initialise - Modele: {model_name}, Cache: {cache_enabled}")
     
     def _call_gemini(self, prompt: str, use_cache: bool = True) -> str:
         """
-        Appelle l'API Gemini avec gestion du cache
+        Appelle l'API Gemini et gere le cache
         
         Args:
-            prompt: Le prompt à envoyer
-            use_cache: Utiliser le cache ou non
+            prompt: Texte a envoyer a l'IA
+            use_cache: Utiliser le cache ou faire un nouvel appel
             
         Returns:
-            Réponse générée
+            Texte genere par l'IA
         """
-        # Vérifier le cache d'abord
+        # Verifier si la reponse est deja en cache
         if use_cache:
             cached_response = self.cache.get(prompt, model=self.model_name)
             if cached_response:
-                logger.info("✅ Réponse récupérée du cache (0 appel API)")
+                logger.info("Reponse trouvee dans le cache (pas d'appel API)")
                 return cached_response
         
-        # Appel API
+        # Faire l'appel API si pas en cache
         try:
-            logger.info(f"📡 Appel API Gemini #{self.api_calls_count + 1}")
+            logger.info(f"Appel API Gemini numero {self.api_calls_count + 1}")
             response = self.model.generate_content(prompt)
             result = response.text
             
@@ -106,17 +103,17 @@ class GenAIIntegration:
                 self.cache.set(prompt, result, model=self.model_name)
             
             self.api_calls_count += 1
-            logger.info(f"✅ Réponse générée (longueur: {len(result)} caractères)")
+            logger.info(f" Réponse générée (longueur: {len(result)} caractères)")
             
             return result
             
         except Exception as e:
-            logger.error(f"❌ Erreur lors de l'appel API Gemini: {e}")
+            logger.error(f" Erreur lors de l'appel API Gemini: {e}")
             return f"[Erreur de génération: {str(e)}]"
     
     def enrich_short_text(self, text: str, min_words: int = 15) -> tuple[str, bool]:
         """
-        EF4.1: Enrichissement conditionnel de texte court (OPTIONNEL)
+        1: Enrichissement conditionnel de texte court (OPTIONNEL)
         
         N'appelle l'API QUE si le texte est trop court.
         
@@ -131,10 +128,10 @@ class GenAIIntegration:
         
         # Si le texte est suffisant, ne pas enrichir
         if word_count >= min_words:
-            logger.info(f"✅ Texte suffisant ({word_count} mots) - Pas d'enrichissement")
+            logger.info(f" Texte suffisant ({word_count} mots) - Pas d'enrichissement")
             return text, False
         
-        logger.info(f"⚠️ Texte court ({word_count} mots) - Enrichissement via GenAI")
+        logger.info(f" Texte court ({word_count} mots) - Enrichissement via GenAI")
         
         prompt = f"""Tu es un assistant qui enrichit des descriptions de préférences cinématographiques.
 
@@ -158,7 +155,7 @@ Description enrichie :"""
         # Combiner le texte original avec l'enrichissement
         final_text = f"{text}\n\n{enriched.strip()}"
         
-        logger.info(f"✅ Texte enrichi ({len(final_text.split())} mots)")
+        logger.info(f" Texte enrichi ({len(final_text.split())} mots)")
         
         return final_text, True
     
@@ -169,9 +166,9 @@ Description enrichie :"""
         user_profile_summary: str
     ) -> str:
         """
-        EF4.2: Génération du Plan de Découverte (UN SEUL APPEL API)
+        2: Génération du Plan de Découverte (UN SEUL APPEL API)
         
-        Équivalent AISCA: Plan de progression personnalisé
+        Equivalent AISCA: Plan de progression personnalisé
         
         Args:
             weak_genres: Genres faiblement couverts (à explorer)
@@ -181,7 +178,7 @@ Description enrichie :"""
         Returns:
             Plan de découverte personnalisé
         """
-        logger.info("🎨 Génération du plan de découverte (1 appel API)")
+        logger.info(" Génération du plan de découverte (1 appel API)")
         
         # Construction du contexte enrichi (AUGMENTED CONTEXT - RAG)
         reco_text = "\n".join([
@@ -216,7 +213,7 @@ Plan de Découverte :"""
         
         plan = self._call_gemini(prompt, use_cache=True)
         
-        logger.info("✅ Plan de découverte généré")
+        logger.info(" Plan de découverte généré")
         
         return plan.strip()
     
@@ -228,9 +225,9 @@ Plan de Découverte :"""
         coverage_score: float
     ) -> str:
         """
-        EF4.3: Synthèse de Profil Cinéphile (UN SEUL APPEL API)
+        3: Synthèse de Profil Cinéphile (UN SEUL APPEL API)
         
-        Équivalent AISCA: Bio professionnelle (Executive Summary)
+        Equivalent AISCA: Bio professionnelle (Executive Summary)
         
         Args:
             recommendations: Top 3 films
@@ -241,7 +238,7 @@ Plan de Découverte :"""
         Returns:
             Profil cinéphile personnalisé
         """
-        logger.info("🎭 Génération du profil cinéphile (1 appel API)")
+        logger.info(" Génération du profil cinéphile (1 appel API)")
         
         # Identifier les genres préférés (score > 0.7)
         top_genres = [g for g, w in sorted(genre_weights.items(), key=lambda x: x[1], reverse=True) if w > 0.7][:3]
@@ -275,7 +272,7 @@ Profil Cinéphile :"""
         
         profile = self._call_gemini(prompt, use_cache=True)
         
-        logger.info("✅ Profil cinéphile généré")
+        logger.info(" Profil cinéphile généré")
         
         return profile.strip()
     

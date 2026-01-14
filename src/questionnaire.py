@@ -1,6 +1,6 @@
 """
 Questionnaire Hybride pour la Collecte des Préférences Cinématographiques
-EF1 : Acquisition de la Donnée
+Acquisition de la Donnée
 
 Combine :
 - Questions ouvertes (texte libre)
@@ -16,7 +16,7 @@ from pathlib import Path
 
 
 class QuestionnaireManager:
-    """Gestionnaire du questionnaire cinématographique (EF1)"""
+    """Gestionnaire du questionnaire cinématographique ()"""
     
     def __init__(self):
         """Initialise le questionnaire avec les catégories de films"""
@@ -58,25 +58,25 @@ class QuestionnaireManager:
     
     def render_questionnaire(self) -> Dict:
         """
-        Affiche le questionnaire et collecte les réponses (EF1.1)
+        Affiche le questionnaire et collecte les réponses (1)
         
         Returns:
             Dictionnaire contenant toutes les réponses utilisateur
         """
-        st.header("🎬 Questionnaire de Préférences Cinématographiques")
+        st.header(" Questionnaire de Préférences Cinématographiques")
         st.markdown("---")
         
         responses = {}
         
         # ============================================================
-        # SECTION 1: Description libre (EF1.1 - Question ouverte)
+        # SECTION 1: Description libre (1 - Question ouverte)
         # ============================================================
-        st.subheader("📝 1. Décrivez votre film idéal")
+        st.subheader(" 1. Décrivez votre film idéal")
         st.markdown("""
         *Décrivez en quelques phrases le type de film que vous recherchez : 
         ambiance, thèmes, émotions recherchées, style narratif, atmosphère...*
         
-        💡 **Conseil** : Plus votre description est riche et détaillée, 
+         **Conseil** : Plus votre description est riche et détaillée, 
         plus l'analyse sémantique sera précise.
         """)
         
@@ -97,9 +97,9 @@ class QuestionnaireManager:
         responses['preferences_genres'] = {genre: 3 for genre in self.genres}
         
         # ============================================================
-        # SECTION 2: Mood/Ambiance (EF1.1 - Likert)
+        # SECTION 2: Mood/Ambiance (1 - Likert)
         # ============================================================
-        st.subheader("🎨 2. Quelle ambiance recherchez-vous ?")
+        st.subheader(" 2. Quelle ambiance recherchez-vous ?")
         st.markdown("""
         *Évaluez l'intensité de l'ambiance ou du mood souhaité*
         
@@ -110,7 +110,7 @@ class QuestionnaireManager:
         
         for mood in self.moods:
             responses['preferences_moods'][mood] = st.slider(
-                f"🎨 {mood}",
+                f" {mood}",
                 min_value=1,
                 max_value=5,
                 value=3,
@@ -123,7 +123,7 @@ class QuestionnaireManager:
         # ============================================================
         # SECTION 3: Questions guidées
         # ============================================================
-        st.subheader("🔍 3. Questions complémentaires")
+        st.subheader(" 3. Questions complémentaires")
         
         # Période préférée
         responses['periode_preferee'] = st.multiselect(
@@ -135,7 +135,7 @@ class QuestionnaireManager:
         
         # Réalisateurs favoris
         responses['realisateurs_favoris'] = st.text_input(
-            "🎬 Réalisateurs favoris (séparés par des virgules)",
+            " Réalisateurs favoris (séparés par des virgules)",
             placeholder="Ex: Christopher Nolan, Denis Villeneuve, Hayao Miyazaki",
             help="Optionnel : cela nous aide à mieux cerner vos goûts cinématographiques",
             key="realisateurs"
@@ -143,7 +143,7 @@ class QuestionnaireManager:
         
         # Films de référence
         responses['films_references'] = st.text_area(
-            "🌟 Films que vous avez adorés (un par ligne)",
+            " Films que vous avez adorés (un par ligne)",
             height=100,
             placeholder="Ex:\nInception\nBlade Runner 2049\nSpirited Away",
             help="Optionnel : listez quelques films que vous considérez comme des références personnelles",
@@ -159,7 +159,7 @@ class QuestionnaireManager:
             key="eviter"
         )
         
-        # Métadonnées (EF1.2 - Structuration)
+        # Métadonnées (2 - Structuration)
         responses['timestamp'] = datetime.now().isoformat()
         responses['version'] = "1.0"
         
@@ -179,10 +179,10 @@ class QuestionnaireManager:
         desc = responses.get('description_libre', '').strip()
         
         if not desc:
-            return False, "⚠️ Veuillez fournir une description de votre film idéal"
+            return False, " Veuillez fournir une description de votre film idéal"
         
         if len(desc) < 20:
-            return False, f"⚠️ Description trop courte ({len(desc)} caractères). Minimum 20 caractères pour une analyse sémantique de qualité."
+            return False, f" Description trop courte ({len(desc)} caractères). Minimum 20 caractères pour une analyse sémantique de qualité."
         
         # Vérification optionnelle : au moins une préférence forte
         genres_prefs = responses.get('preferences_genres', {})
@@ -190,13 +190,13 @@ class QuestionnaireManager:
         
         if not has_strong_pref:
             # Warning mais pas bloquant
-            st.info("💡 Astuce : Indiquer au moins un genre avec un score de 4 ou 5 améliore la précision des recommandations")
+            st.info(" Astuce : Indiquer au moins un genre avec un score de 4 ou 5 améliore la précision des recommandations")
         
-        return True, "✅ Questionnaire validé"
+        return True, " Questionnaire validé"
     
     def save_responses(self, responses: Dict, filepath: str = "data/user_responses.json") -> bool:
         """
-        Sauvegarde les réponses utilisateur (EF1.2 - Structuration)
+        Sauvegarde les réponses utilisateur (2 - Structuration)
         
         Args:
             responses: Dictionnaire des réponses
@@ -219,7 +219,7 @@ class QuestionnaireManager:
                             loaded = json.loads(content)
                             all_responses = loaded if isinstance(loaded, list) else [loaded]
                 except json.JSONDecodeError:
-                    st.warning("⚠️ Fichier de réponses corrompu, création d'un nouveau fichier")
+                    st.warning(" Fichier de réponses corrompu, création d'un nouveau fichier")
                     all_responses = []
             
             # Ajouter les nouvelles réponses
@@ -229,11 +229,11 @@ class QuestionnaireManager:
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(all_responses, f, ensure_ascii=False, indent=2)
             
-            st.success(f"💾 Réponses sauvegardées avec succès ({len(all_responses)} sessions totales)")
+            st.success(f" Réponses sauvegardées avec succès ({len(all_responses)} sessions totales)")
             return True
             
         except Exception as e:
-            st.error(f"❌ Erreur lors de la sauvegarde: {e}")
+            st.error(f" Erreur lors de la sauvegarde: {e}")
             return False
     
     def get_text_for_analysis(self, responses: Dict) -> str:
