@@ -93,37 +93,13 @@ class QuestionnaireManager:
         
         st.markdown("---")
         
-        # ============================================================
-        # SECTION 2: Auto-déclaration par genre (EF1.1 - Likert)
-        # ============================================================
-        st.subheader("🎭 2. Évaluez votre intérêt pour chaque genre")
-        st.markdown("""
-        *Utilisez l'échelle de Likert pour indiquer votre niveau d'intérêt*
-        
-        **Échelle** : 1 = Pas du tout intéressé | 5 = Très intéressé
-        """)
-        
-        responses['preferences_genres'] = {}
-        
-        # Affichage en 2 colonnes pour meilleure UX
-        cols = st.columns(2)
-        for idx, genre in enumerate(self.genres):
-            with cols[idx % 2]:
-                responses['preferences_genres'][genre] = st.slider(
-                    f"🎬 {genre}",
-                    min_value=1,
-                    max_value=5,
-                    value=3,
-                    key=f"genre_{genre}",
-                    help=f"Votre niveau d'intérêt pour le genre {genre}"
-                )
-        
-        st.markdown("---")
+        # Initialiser les préférences de genres avec des valeurs par défaut
+        responses['preferences_genres'] = {genre: 3 for genre in self.genres}
         
         # ============================================================
-        # SECTION 3: Mood/Ambiance (EF1.1 - Likert)
+        # SECTION 2: Mood/Ambiance (EF1.1 - Likert)
         # ============================================================
-        st.subheader("🎨 3. Quelle ambiance recherchez-vous ?")
+        st.subheader("🎨 2. Quelle ambiance recherchez-vous ?")
         st.markdown("""
         *Évaluez l'intensité de l'ambiance ou du mood souhaité*
         
@@ -145,9 +121,9 @@ class QuestionnaireManager:
         st.markdown("---")
         
         # ============================================================
-        # SECTION 4: Questions guidées
+        # SECTION 3: Questions guidées
         # ============================================================
-        st.subheader("🔍 4. Questions complémentaires")
+        st.subheader("🔍 3. Questions complémentaires")
         
         # Période préférée
         responses['periode_preferee'] = st.multiselect(
@@ -272,38 +248,32 @@ class QuestionnaireManager:
         """
         text_parts = []
         
-        # SECTION 1: Genres préférés (convertis en texte descriptif)
-        genres_prefs = responses.get('preferences_genres', {})
-        top_genres = [genre for genre, score in sorted(genres_prefs.items(), key=lambda x: x[1], reverse=True) if score >= 4]
-        if top_genres:
-            text_parts.append(f"J'adore les films de {', '.join(top_genres)}.")
-        
-        # SECTION 2: Ambiances préférées (convertis en texte descriptif)
+        # SECTION 1: Ambiances préférées (convertis en texte descriptif)
         moods_prefs = responses.get('preferences_moods', {})
         top_moods = [mood for mood, score in sorted(moods_prefs.items(), key=lambda x: x[1], reverse=True) if score >= 4]
         if top_moods:
             text_parts.append(f"Je recherche une ambiance {', '.join(top_moods)}.")
         
-        # SECTION 3: Description principale (poids fort)
+        # SECTION 2: Description principale (poids fort)
         if responses.get('description_libre'):
             text_parts.append(responses['description_libre'])
         
-        # SECTION 4: Réalisateurs favoris
+        # SECTION 3: Réalisateurs favoris
         if responses.get('realisateurs_favoris'):
             text_parts.append(f"Réalisateurs appréciés: {responses['realisateurs_favoris']}")
         
-        # SECTION 5: Films de référence
+        # SECTION 4: Films de référence
         if responses.get('films_references'):
             films_list = responses['films_references'].strip()
             if films_list:
                 text_parts.append(f"Films de référence: {films_list}")
         
-        # SECTION 6: Périodes préférées
+        # SECTION 5: Périodes préférées
         if responses.get('periode_preferee'):
             periodes_str = ", ".join(responses['periode_preferee'])
             text_parts.append(f"Périodes préférées: {periodes_str}")
         
-        # SECTION 7: Éléments à éviter (avec contexte négatif)
+        # SECTION 6: Éléments à éviter (avec contexte négatif)
         if responses.get('elements_a_eviter'):
             text_parts.append(f"Je n'aime pas: {responses['elements_a_eviter']}")
         
