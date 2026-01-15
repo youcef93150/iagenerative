@@ -32,28 +32,179 @@ st.set_page_config(
     page_title="AISCA-Cinema | Recommandation Cinématographique IA",
     page_icon="🎬",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
-# CSS personnalisé
+# CSS personnalisé - Design moderne sans sidebar
 st.markdown("""
 <style>
+    /* Cacher completement la sidebar */
+    [data-testid="stSidebar"] {
+        display: none;
+    }
+    
+    /* Fond de page sombre */
+    .stApp {
+        background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+    }
+    
+    .main .block-container {
+        background: linear-gradient(180deg, #1a1a2e 0%, #0f3460 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(14, 165, 233, 0.2);
+    }
+    
+    /* Header principal avec gradient cyan-bleu */
     .main-header {
-        font-size: 3rem;
-        font-weight: bold;
+        font-size: 3.5rem;
+        font-weight: 800;
         text-align: center;
-        background: linear-gradient(120deg, #FF6B6B, #4ECDC4);
+        background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0.5rem;
+        padding: 1rem 0;
+        filter: drop-shadow(0 0 20px rgba(14, 165, 233, 0.3));
     }
+    
+    /* Sous-titre elegant */
     .sub-header {
         text-align: center;
-        color: #7F8C8D;
-        margin-bottom: 2rem;
+        color: #94a3b8;
+        font-size: 1.2rem;
+        margin-bottom: 3rem;
+        font-weight: 300;
     }
+    
+    /* Boutons modernes avec gradient cyan */
     .stButton>button {
         width: 100%;
+        background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+    }
+    
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(14, 165, 233, 0.6);
+        background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%);
+    }
+    
+    /* Tabs modernes sombres */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background: rgba(15, 23, 42, 0.8);
+        padding: 0.5rem;
+        border-radius: 12px;
+        border: 1px solid rgba(14, 165, 233, 0.2);
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        color: #94a3b8;
+        background: transparent;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        color: white !important;
+    }
+    
+    /* Cards et containers sombres */
+    .stExpander {
+        border: 1px solid rgba(14, 165, 233, 0.3);
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.6);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Metriques modernes avec couleur cyan */
+    [data-testid="stMetricValue"] {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    /* Messages info avec theme sombre */
+    .stInfo {
+        background: rgba(14, 165, 233, 0.1);
+        border-left: 4px solid #0ea5e9;
+        border-radius: 12px;
+        color: #e0f2fe;
+    }
+    
+    .stSuccess {
+        background: rgba(34, 197, 94, 0.1);
+        border-left: 4px solid #22c55e;
+        border-radius: 12px;
+        color: #dcfce7;
+    }
+    
+    .stWarning {
+        background: rgba(245, 158, 11, 0.1);
+        border-left: 4px solid #f59e0b;
+        border-radius: 12px;
+        color: #fef3c7;
+    }
+    
+    .stError {
+        background: rgba(239, 68, 68, 0.1);
+        border-left: 4px solid #ef4444;
+        border-radius: 12px;
+        color: #fee2e2;
+    }
+    
+    /* Espacement global */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        max-width: 1200px;
+    }
+    
+    /* Inputs et selects theme sombre */
+    .stTextInput input, .stTextArea textarea, .stSelectbox select {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(14, 165, 233, 0.3);
+        border-radius: 8px;
+        color: #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .stTextInput input:focus, .stTextArea textarea:focus, .stSelectbox select:focus {
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        background: rgba(15, 23, 42, 0.9);
+    }
+    
+    /* Labels en clair pour contraste */
+    label {
+        color: #cbd5e1 !important;
+    }
+    
+    /* Texte general */
+    .stMarkdown, p, span {
+        color: #cbd5e1;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        color: #e2e8f0;
+    }
+    
+    /* Separateurs */
+    hr {
+        border-color: rgba(14, 165, 233, 0.2);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -74,65 +225,44 @@ def main():
     
     initialize_session_state()
     
-    # Section en-tete de la page
+    # Header principal avec badge de projet
     st.markdown('<h1 class="main-header">🎬 AISCA-Cinema</h1>', unsafe_allow_html=True)
     st.markdown(
-        '<p class="sub-header">Agent Intelligent Sémantique et Génératif de Recommandation Cinématographique</p>',
+        '<p class="sub-header">Agent Intelligent de Recommandation Cinématographique propulsé par IA</p>',
         unsafe_allow_html=True
     )
     
-    # Sidebar avec les infos du projet
-    with st.sidebar:
-        st.image("https://via.placeholder.com/300x100/FF6B6B/FFFFFF?text=AISCA-Cinema", width=300)
-        
-        st.markdown("### 📋 À propos")
-        st.info("""
-        **AISCA-Cinema** utilise :
-        - 🧠 **SBERT** pour l'analyse sémantique
-        - 🤖 **Gemini AI** pour la génération
-        - 📊 **Architecture RAG** pour des recommandations fiables
-        
-        **Projet EFREI 2025-26**  
-        Module: IA Générative  
-        RNCP40875 - Bloc 2
-        """)
-        
-        st.markdown("### 🔧 Technologies")
-        st.markdown("""
-        - Python 3.9+
-        - Streamlit
-        - SentenceTransformers
-        - Google Gemini API
-        - Plotly
-        """)
-        
-        st.markdown("### 📊 Exigences Implémentées")
-        st.success("✅ EF1: Questionnaire Hybride")
-        st.success("✅ EF2: Moteur NLP SBERT")
-        st.success("✅ EF3: Scoring & Top 3")
-        st.success("✅ EF4: GenAI + Cache")
-        
-        if st.session_state.analysis_done:
-            if st.button("🔄 Nouvelle Analyse"):
-                st.session_state.responses = None
-                st.session_state.recommendations = None
-                st.session_state.analysis_done = False
-                st.rerun()
+    # Badge du projet en haut
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.info("🎓 **Projet EFREI 2025-26** | Module IA Générative | RNCP40875 - Bloc 2")
+    
+    st.markdown("---")
     
     # Etape 1 - Affichage du questionnaire
     if not st.session_state.analysis_done:
-        st.markdown("## 📝 Étape 1 : Questionnaire de Préférences")
-        st.markdown("Complétez le questionnaire ci-dessous pour découvrir vos recommandations personnalisées.")
+        st.markdown("## 📝 Questionnaire de Préférences")
+        st.markdown("Répondez aux questions ci-dessous pour obtenir vos recommandations personnalisées.")
         
         questionnaire = QuestionnaireManager()
         responses = questionnaire.render_questionnaire()
         
         st.markdown("---")
         
-        # Bouton d'analyse
-        col1, col2, col3 = st.columns([1, 2, 1])
+        # Bouton d'analyse centre
+        col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
             analyze_button = st.button("🎯 Analyser mes Préférences", type="primary", use_container_width=True)
+        
+        # Bouton de reinitialisation si deja analyse
+        if st.session_state.get('recommendations'):
+            col1, col2, col3 = st.columns([1, 1, 1])
+            with col2:
+                if st.button("🔄 Nouvelle Analyse", use_container_width=True):
+                    st.session_state.responses = None
+                    st.session_state.recommendations = None
+                    st.session_state.analysis_done = False
+                    st.rerun()
         
         if analyze_button:
             # Valider les réponses
@@ -241,6 +371,16 @@ def main():
         results = st.session_state.recommendations
         responses = st.session_state.responses
         
+        # Bouton nouvelle analyse en haut
+        col1, col2, col3 = st.columns([2, 1, 2])
+        with col2:
+            if st.button("🔄 Nouvelle Analyse", use_container_width=True):
+                st.session_state.responses = None
+                st.session_state.recommendations = None
+                st.session_state.analysis_done = False
+                st.rerun()
+        
+        st.markdown("---")
         st.markdown("## 🎯 Vos Recommandations Personnalisées")
         st.markdown("---")
         
@@ -352,13 +492,17 @@ Où tous les scores sont normalisés dans [0, 1]
                 ])
                 st.dataframe(df_scores, use_container_width=True)
     
-    # Footer de la page
+    # Footer moderne et epure
     st.markdown("---")
     st.markdown(
         """
-        <div style='text-align: center; color: #7F8C8D;'>
-            <p>🎬 <strong>AISCA-Cinema</strong> | Projet EFREI 2025-26 | IA Générative</p>
-            <p>Développé avec ❤️ en Python | Streamlit | SBERT | Gemini AI</p>
+        <div style='text-align: center; color: #64748b; padding: 2rem 0;'>
+            <p style='font-size: 0.9rem; margin-bottom: 0.5rem;'>
+                🎬 <strong style='background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>AISCA-Cinema</strong> | Recommandation Cinématographique Intelligente
+            </p>
+            <p style='font-size: 0.85rem; color: #475569;'>
+                Projet EFREI 2025-26 • Architecture RAG • SBERT + Gemini AI
+            </p>
         </div>
         """,
         unsafe_allow_html=True
