@@ -1,9 +1,5 @@
 """
-Moteur NLP pour l'analyse semantique avec SBERT
-Module principal pour analyser les preferences utilisateur
-
-Utilise les embeddings SBERT pour calculer la similarite
-entre les preferences de l'utilisateur et les films
+Moteur NLP avec SBERT pour l'analyse semantique des preferences
 """
 
 import pandas as pd
@@ -17,22 +13,12 @@ logger = logging.getLogger(__name__)
 
 
 class NLPEngine:
-    """
-    Classe principale pour l'analyse semantique avec SBERT
-    Permet de comparer les textes et trouver les films similaires
-    """
+    """Moteur d'analyse semantique SBERT"""
     
     def __init__(self, model_name: str = 'paraphrase-multilingual-MiniLM-L12-v2'):
-        """
-        Initialisation du moteur NLP
-        
-        Args:
-            model_name: Nom du modele SBERT a utiliser
-                       On utilise un modele multilingue pour le francais
-        """
+        """Initialise le modele SBERT"""
         logger.info(f"Chargement du modèle SBERT: {model_name}")
         
-        # Charger le modele SBERT pour analyser le texte
         self.model = SentenceTransformer(model_name)
         self.model_name = model_name
         self.referentiel = None
@@ -41,44 +27,20 @@ class NLPEngine:
         logger.info("Modèle SBERT chargé avec succès")
     
     def load_referentiel(self, filepath: str = 'data/films_referentiel.csv') -> pd.DataFrame:
-        """
-        Charge la base de donnees des films depuis le fichier CSV
-        
-        Dans AISCA: charge les blocs de compétences
-        Ici: charge les blocs de genres cinématographiques
-        
-        Args:
-            filepath: Chemin vers le fichier CSV du référentiel
-            
-        Returns:
-            DataFrame du référentiel
-        """
-        logger.info(f" Chargement du référentiel cinématographique: {filepath}")
+        """Charge la base de films depuis le CSV"""
+        logger.info(f"Chargement du référentiel: {filepath}")
         
         self.referentiel = pd.read_csv(filepath)
-        
-        # Créer une colonne avec la description complète pour l'analyse sémantique
-        # (équivalent à la compilation des compétences dans AISCA)
         self.referentiel['texte_complet'] = self.referentiel.apply(
             lambda row: self._build_film_text(row),
             axis=1
         )
         
-        logger.info(f" Referentiel chargé: {len(self.referentiel)} films répartis en blocs de genres")
-        logger.info(f" Genres disponibles: {self.referentiel['Categorie'].unique().tolist()}")
-        
+        logger.info(f"Referentiel chargé: {len(self.referentiel)} films")
         return self.referentiel
     
     def _build_film_text(self, row: pd.Series) -> str:
-        """
-        Construit le texte sémantique complet d'un film
-        
-        Args:
-            row: Ligne du DataFrame
-            
-        Returns:
-            Texte enrichi pour l'embedding
-        """
+        """Construit le texte complet pour l'embedding"""
         return (
             f"{row['Film']} ({row['Annee']}). "
             f"Réalisé par {row['Realisateur']}. "
@@ -89,46 +51,26 @@ class NLPEngine:
         )
     
     def encode_text(self, text: str, cache_key: Optional[str] = None) -> np.ndarray:
-        """
-        Encode un texte en vecteur d'embeddings (2 - SBERT)
-        
-        Args:
-            text: Texte à encoder
-            cache_key: Clé pour le cache (optionnel)
-            
-        Returns:
-            Vecteur d'embeddings contextuels
-        """
-        # Vérifier le cache
+        """Encode un texte en vecteur d'embeddings"""
         if cache_key and cache_key in self.embeddings_cache:
-            logger.debug(f" Cache HIT pour: {cache_key}")
+            logger.debug(f"Cache HIT pour: {cache_key}")
             return self.embeddings_cache[cache_key]
         
-        # Encoder le texte avec SBERT
         embedding = self.model.encode(text, convert_to_numpy=True, show_progress_bar=False)
         
-        # Mettre en cache
         if cache_key:
             self.embeddings_cache[cache_key] = embedding
-            logger.debug(f" Embedding mis en cache: {cache_key}")
+            logger.debug(f"Embedding mis en cache: {cache_key}")
         
         return embedding
     
     def encode_referentiel(self) -> np.ndarray:
-        """
-        Encode tous les films du référentiel en embeddings
-        
-        Equivalent AISCA: encode tous les blocs de compétences
-        
-        Returns:
-            Matrice d'embeddings (n_films, embedding_dim)
-        """
+        """Encode tous les films du référentiel"""
         if self.referentiel is None:
-            raise ValueError(" Le référentiel doit être chargé avant l'encodage")
+            raise ValueError("Le référentiel doit être chargé avant l'encodage")
         
-        logger.info(f" Encodage de {len(self.referentiel)} films avec SBERT...")
+        logger.info(f"Encodage de {len(self.referentiel)} films...")
         
-        # Encoder tous les textes
         embeddings = self.model.encode(
             self.referentiel['texte_complet'].tolist(),
             convert_to_numpy=True,
@@ -136,8 +78,7 @@ class NLPEngine:
             batch_size=32
         )
         
-        logger.info(f" Encodage terminé - Shape: {embeddings.shape}")
-        
+        logger.info(f"Encodage terminé - Shape: {embeddings.shape}")
         return embeddings
     
     def calculate_similarity(
@@ -145,29 +86,14 @@ class NLPEngine:
         user_embedding: np.ndarray, 
         referentiel_embeddings: np.ndarray
     ) -> np.ndarray:
-        """
-        Calcule la similarité cosinus (3 - Mesure de Similarité)
-        
-        Equivalent AISCA: calcule le matching entre profil utilisateur et compétences
-        
-        Args:
-            user_embedding: Embedding de la requête utilisateur
-            referentiel_embeddings: Embeddings du référentiel de films
-            
-        Returns:
-            Array des scores de similarité [0, 1]
-        """
-        # Reshape si nécessaire
+        """Calcule la similarité cosinus"""
         if user_embedding.ndim == 1:
             user_embedding = user_embedding.reshape(1, -1)
         
-        # 3: Mesure de Similarité Cosinus
         similarities = cosine_similarity(user_embedding, referentiel_embeddings)[0]
         
-        logger.info(f" Similarité calculée - "
-                   f"Min: {similarities.min():.3f}, "
-                   f"Max: {similarities.max():.3f}, "
-                   f"Moyenne: {similarities.mean():.3f}")
+        logger.info(f"Similarité - Min: {similarities.min():.3f}, "
+                   f"Max: {similarities.max():.3f}, Moyenne: {similarities.mean():.3f}")
         
         return similarities
     
@@ -176,25 +102,11 @@ class NLPEngine:
         similarities: np.ndarray, 
         top_n: int = 3
     ) -> List[Tuple[int, float]]:
-        """
-        Récupère les top N films les plus similaires
-        
-        Equivalent AISCA: récupère les top profils métiers
-        
-        Args:
-            similarities: Array des scores de similarité
-            top_n: Nombre de recommandations à retourner (défaut: 3 comme dans AISCA)
-            
-        Returns:
-            Liste de tuples (index, score) triée par score décroissant
-        """
-        # Trier par similarité décroissante
+        """Recupere les top N films les plus similaires"""
         top_indices = np.argsort(similarities)[::-1][:top_n]
-        
         results = [(idx, float(similarities[idx])) for idx in top_indices]
         
-        logger.info(f" Top {top_n} matches identifiés avec scores: {[f'{s:.3f}' for _, s in results]}")
-        
+        logger.info(f"Top {top_n} matches: {[f'{s:.3f}' for _, s in results]}")
         return results
     
     def analyze_user_input(
@@ -202,40 +114,17 @@ class NLPEngine:
         user_text: str, 
         top_n: int = 3
     ) -> Tuple[List[Dict], np.ndarray]:
-        """
-        Pipeline complet d'analyse sémantique
-        
-        Equivalent AISCA: pipeline complet de cartographie des compétences
-        
-        Args:
-            user_text: Texte consolidé de l'utilisateur
-            top_n: Nombre de recommandations (2: top 3)
-            
-        Returns:
-            (recommandations, similarités): Liste des films recommandés et array des scores
-        """
+        """Pipeline d'analyse semantique complet"""
         if self.referentiel is None:
-            raise ValueError(" Le référentiel doit être chargé avant l'analyse")
+            raise ValueError("Le référentiel doit être chargé avant l'analyse")
         
-        logger.info(" Début de l'analyse sémantique...")
+        logger.info("Début de l'analyse sémantique...")
         
-        # 1. Encoder l'entrée utilisateur
-        logger.info(" Étape 1/4: Encodage de l'entrée utilisateur")
         user_embedding = self.encode_text(user_text, cache_key="current_user_query")
-        
-        # 2. Encoder le référentiel
-        logger.info(" Étape 2/4: Encodage du référentiel de films")
         referentiel_embeddings = self.encode_referentiel()
-        
-        # 3. Calculer les similarités
-        logger.info(" Étape 3/4: Calcul de la similarité cosinus")
         similarities = self.calculate_similarity(user_embedding, referentiel_embeddings)
-        
-        # 4. Obtenir les top matches
-        logger.info(f" Étape 4/4: Extraction des top {top_n} recommandations")
         top_matches = self.get_top_matches(similarities, top_n)
         
-        # 5. Construire les recommandations détaillées
         recommendations = []
         for idx, score in top_matches:
             film = self.referentiel.iloc[idx]
@@ -254,8 +143,7 @@ class NLPEngine:
                 'rang': len(recommendations) + 1
             })
         
-        logger.info(f" Analyse terminée: {len(recommendations)} recommandations générées")
-        
+        logger.info(f"Analyse terminée: {len(recommendations)} recommandations")
         return recommendations, similarities
     
     def get_genre_distribution(
@@ -263,31 +151,17 @@ class NLPEngine:
         similarities: np.ndarray, 
         threshold: float = 0.5
     ) -> Dict[str, float]:
-        """
-        Analyse la distribution des genres basée sur la similarité
-        
-        Equivalent AISCA: distribution des blocs de compétences
-        
-        Args:
-            similarities: Array des scores de similarité
-            threshold: Seuil minimal de similarité
-            
-        Returns:
-            Dictionnaire {genre: score_moyen} trié par score décroissant
-        """
+        """Analyse la distribution des genres par similarite"""
         if self.referentiel is None:
             return {}
         
-        # Filtrer les films au-dessus du seuil
         mask = similarities >= threshold
         
         if not mask.any():
-            logger.warning(f" Aucun film au-dessus du seuil {threshold}")
+            logger.warning(f"Aucun film au-dessus du seuil {threshold}")
             return {}
         
-        # Calculer les scores moyens par genre
         genre_scores = {}
-        
         for genre in self.referentiel['Categorie'].unique():
             genre_mask = self.referentiel['Categorie'] == genre
             combined_mask = mask & genre_mask
@@ -295,25 +169,13 @@ class NLPEngine:
             if combined_mask.any():
                 genre_scores[genre] = float(similarities[combined_mask].mean())
         
-        # Trier par score décroissant
         sorted_genres = dict(sorted(genre_scores.items(), key=lambda x: x[1], reverse=True))
-        
-        logger.info(f" Distribution des genres (seuil {threshold}): {len(sorted_genres)} genres")
+        logger.info(f"Distribution: {len(sorted_genres)} genres")
         
         return sorted_genres
     
     def get_coverage_stats(self, similarities: np.ndarray) -> Dict:
-        """
-        Statistiques de couverture du profil utilisateur
-        
-        Equivalent AISCA: couverture des compétences
-        
-        Args:
-            similarities: Array des scores de similarité
-            
-        Returns:
-            Statistiques détaillées
-        """
+        """Statistiques de couverture du profil utilisateur"""
         return {
             'score_moyen': float(similarities.mean()),
             'score_median': float(np.median(similarities)),

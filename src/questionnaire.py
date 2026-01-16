@@ -1,11 +1,5 @@
 """
-Questionnaire Hybride pour la Collecte des Preferences Cinematographiques
-EF1 : Acquisition de la Donnee
-
-Combine :
-- Questions ouvertes (texte libre)
-- Echelles de Likert (auto-declaration)
-- Questions guidees
+Questionnaire pour collecter les preferences cinematographiques
 """
 
 import streamlit as st
@@ -16,12 +10,10 @@ from pathlib import Path
 
 
 class QuestionnaireManager:
-    """Gestionnaire du questionnaire cinematographique (EF1)"""
+    """Gestionnaire du questionnaire"""
     
     def __init__(self):
-        """Initialise le questionnaire avec les categories de films"""
-        
-        # Blocs de genres (adapte d'AISCA - 10 blocs)
+        """Initialise les categories de films"""
         self.genres = [
             "Science-Fiction",
             "Drame",
@@ -35,7 +27,6 @@ class QuestionnaireManager:
             "Biopic"
         ]
         
-        # Ambiances/Moods (equivalent aux competences dans AISCA)
         self.moods = [
             "Intellectuel/Reflexif",
             "Emotionnel/Touchant",
@@ -47,7 +38,6 @@ class QuestionnaireManager:
             "Energique/Dynamique"
         ]
         
-        # Periodes (questions guidees)
         self.periodes = [
             "Annees 1980 et avant",
             "Annees 1990",

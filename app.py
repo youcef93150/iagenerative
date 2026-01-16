@@ -1,33 +1,23 @@
 """
-Application principale de recommandation de films
-Interface Streamlit pour AISCA-Cinema
-
-Projet EFREI - IA Générative 2025-26
-RNCP40875 - Bloc 2
-
-Architecture RAG pour recommander des films
-Basé sur le framework AISCA adapté au cinéma
+Application de recommandation de films avec IA
 """
 
 import streamlit as st
 import logging
 from pathlib import Path
 
-# Imports des modules du projet
 from src.questionnaire import QuestionnaireManager
 from src.nlp_engine import NLPEngine
 from src.scoring import ScoringSystem
 from src.genai_integration import GenAIIntegration
 from src.visualization import VisualizationManager
 
-# Configuration des logs
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-# Configuration de la page Streamlit
 st.set_page_config(
     page_title="AISCA-Cinema | Recommandation Cinématographique IA",
     page_icon="🎬",
@@ -35,15 +25,12 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# CSS personnalisé - Design moderne sans sidebar
 st.markdown("""
 <style>
-    /* Cacher completement la sidebar */
     [data-testid="stSidebar"] {
         display: none;
     }
     
-    /* Fond de page sombre */
     .stApp {
         background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
     }
