@@ -30,25 +30,22 @@ Développer un agent RAG (Retrieval-Augmented Generation) capable de :
 
 ```
 cinema-recommendation-agent/
-├── README.md                       # Documentation complète
-├── requirements.txt                # Dépendances Python
+├── README.md                       # Documentation
+├── requirements.txt                # Dependances Python
 ├── .env.example                    # Template configuration API
-├── .gitignore                      # Fichiers à ignorer
-├── app.py                          # 🎯 Interface Streamlit principale
+├── .gitignore                      # Fichiers a ignorer
+├── app.py                          # Interface Streamlit principale
 ├── data/
-│   ├── films_referentiel.csv       # 📊 Base de données 55+ films
-│   └── user_responses.json         # 💾 Stockage réponses utilisateur
+│   └── films_referentiel.csv       # Base de donnees 260 films reels
 ├── src/
 │   ├── __init__.py
-│   ├── questionnaire.py            # EF1 : Questionnaire hybride
-│   ├── nlp_engine.py               # EF2 : Moteur NLP/SBERT
-│   ├── scoring.py                  # EF3 : Système de scoring
-│   ├── genai_integration.py        # EF4 : Intégration Gemini
+│   ├── questionnaire.py            # Questionnaire hybride
+│   ├── nlp_engine.py               # Moteur NLP SBERT
+│   ├── scoring.py                  # Systeme de scoring
+│   ├── genai_integration.py        # Integration Gemini AI
 │   ├── visualization.py            # Graphiques et visualisations
-│   └── cache_manager.py            # Cache pour limiter coûts API
-├── .cache/                         # Cache local GenAI
-└── tests/
-    └── test_nlp_engine.py          # Tests unitaires
+│   └── cache_manager.py            # Cache pour limiter couts API
+└── .cache/                         # Cache local GenAI
 ```
 
 ---
