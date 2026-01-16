@@ -7,5 +7,5 @@ Adaptation de l'architecture AISCA appliquée au domaine cinématographique.
 """
 
 __version__ = "1.0.0"
-__author__ = "Votre Nom - Binôme"
+__author__ = "Derouiche - Boucher"
 __project__ = "AISCA-Cinema: Agent RAG de Recommandation de Films"

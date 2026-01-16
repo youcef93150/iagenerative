@@ -230,7 +230,7 @@ class VisualizationManager:
             rank: Rang de la recommandation
         """
         # Émojis de médailles
-        medals = {1: "🥇", 2: "🥈", 3: "🥉"}
+        medals = {1: "1.", 2: "2.", 3: "3."}
         medal = medals.get(rank, "")
         
         with st.container():

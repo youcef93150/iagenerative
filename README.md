@@ -1,152 +1,85 @@
-# 🎬 Agent de Recommandation Cinéma
+Projet AISCA-Cinema
+Auteurs : Anthony BOUCHER & Youcef DEROUICHE Projet : Agent Intelligent de Recommandation Cinématographique Module : IA Générative - EFREI 2025-2026 (Bloc 2)
 
-**Projet EFREI - IA Générative 2025-26**
+Description
+AISCA-Cinema est une application web qui recommande des films en analysant le sens de vos phrases (analyse sémantique) plutôt que de simples mots-clés. Elle utilise une architecture RAG (Retrieval-Augmented Generation) combinant :
 
-Un système intelligent qui recommande des films en fonction de vos goûts, basé sur SBERT et l'IA Gemini.
+SBERT (Sentence-BERT) : Pour trouver mathématiquement les films correspondant à votre description.
 
----
+Google Gemini : Une IA générative pour expliquer les recommandations et créer un profil cinéphile personnalisé.
 
-## C'est quoi ce projet ?
+Installation et Lancement
+Suivez ces étapes pour installer le projet sur votre machine.
 
-En gros, c'est une app qui pose des questions sur vos préférences ciné (genres, ambiances, ce que vous cherchez...) et qui utilise l'IA pour proposer 3 films qui devraient vraiment vous plaire. 
+1. Prérequis techniques
+   Python installé (version 3.9 ou supérieure).
 
-L'app analyse ce que vous dites avec du NLP (traitement du langage), compare ça avec une base de 260 films, et sort les meilleures recommandations avec des explications personnalisées générées par Gemini.
+Une clé API Google Gemini (gratuite via Google AI Studio).
 
-**Architecture RAG** : on récupère les films pertinents avec SBERT (partie Retrieval), puis on génère des textes personnalisés avec Gemini (partie Generation).
+2. Installation
+   Ouvrez un terminal dans le dossier du projet et exécutez les commandes suivantes :
 
----
+Pour Windows :
 
-## Comment lancer l'app ?
+Bash
 
-### Installation rapide
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+Pour Mac / Linux :
 
-```bash
-# 1. Clonez le projet (ou téléchargez-le)
-cd /Users/youcef/Downloads/cinema-recommendation-agent
+Bash
 
-# 2. Créez un environnement virtuel
 python3 -m venv venv
 source venv/bin/activate
+pip install -r requirements.txt 3. Configuration de la clé API
+L'application a besoin de votre clé Google pour la partie générative.
 
-# 3. Installez les dépendances
-pip install -r requirements.txt
+Dans le dossier du projet, localisez le fichier .env.example.
 
-# 4. Configurez votre clé API Gemini
-cp .env.example .env
-# Éditez le fichier .env et mettez votre clé API (gratuite sur https://makersuite.google.com/app/apikey)
+Renommez ce fichier en .env.
 
-# 5. Lancez l'app
+Ouvrez-le avec un éditeur de texte et collez votre clé API à la place du texte existant : GEMINI_API_KEY=votre_cle_commencant_par_AIza...
+
+4. Lancement de l'application
+   Une fois l'installation terminée, lancez la commande suivante dans le terminal :
+
+Bash
+
 streamlit run app.py
-```
+L'application s'ouvrira automatiquement dans votre navigateur web par défaut.
 
-L'app s'ouvre automatiquement sur `http://localhost:8501`
+Fonctionnement de l'application
+L'application suit un processus en 4 étapes :
 
----
+Acquisition : Vous remplissez un questionnaire hybride (texte libre + échelles de préférences).
 
-## Comment ça marche ?
+Analyse (NLP) : Le moteur SBERT transforme votre texte en vecteurs et cherche les films les plus proches dans notre base de données de 260 films.
 
-### Le questionnaire
-Vous remplissez un questionnaire avec :
-- Une description libre de ce que vous cherchez (minimum 20 caractères)
-- Vos préférences pour 10 genres de films (échelle de 1 à 5)
-- Vos préférences pour 8 ambiances différentes (échelle de 1 à 5)
-- Période préférée, réalisateurs favoris, films de référence...
+Scoring : Un algorithme classe les films selon une formule pondérée :
 
-### L'analyse sémantique
-L'app utilise SBERT (un modèle NLP ultra performant) pour comprendre ce que vous voulez vraiment. Ça transforme votre texte en vecteurs et calcule la similarité avec les 260 films de la base.
+50% : Pertinence sémantique (votre texte).
 
-### Le scoring
-Chaque film reçoit un score basé sur :
-- **50%** : similarité sémantique (ce que vous avez écrit)
-- **30%** : vos préférences de genres
-- **20%** : vos préférences d'ambiance
+30% : Vos genres préférés.
 
-### Les recommandations
-L'app sort les 3 meilleurs films avec :
-- Des explications personnalisées (générées par Gemini)
-- Des graphiques de vos préférences
-- Un profil cinéphile personnalisé
-- Des suggestions pour découvrir de nouveaux genres
+20% : L'ambiance (Mood) recherchée.
 
----
+Génération (IA) : Google Gemini rédige une synthèse de votre profil et vous propose un plan de découverte basé sur les résultats.
 
-## Technologies utilisées
+Structure du projet
+app.py : Point d'entrée de l'interface graphique.
 
-- **Python 3.9+** : langage principal
-- **Streamlit** : interface web interactive
-- **SentenceTransformers** : embeddings SBERT pour l'analyse sémantique
-- **Google Gemini** : IA générative pour les textes personnalisés
-- **Plotly** : graphiques interactifs
-- **Pandas** : manipulation des données
+data/ : Contient le fichier CSV des 260 films et le fichier de sauvegarde des réponses.
 
----
+src/nlp_engine.py : Contient la logique d'analyse sémantique (SBERT).
 
-## Structure du projet
+src/genai_integration.py : Gère les appels à l'API Google Gemini.
 
-```
-cinema-recommendation-agent/
-├── app.py                      # App Streamlit principale
-├── requirements.txt            # Dépendances Python
-├── .env.example               # Template config API
-├── data/
-│   └── films_referentiel.csv  # Base de 260 films
-└── src/
-    ├── questionnaire.py       # Interface de questionnaire
-    ├── nlp_engine.py          # Moteur SBERT
-    ├── scoring.py             # Calcul des scores
-    ├── genai_integration.py   # Intégration Gemini
-    ├── visualization.py       # Graphiques
-    └── cache_manager.py       # Gestion du cache API
-```
+src/scoring.py : Contient l'algorithme de calcul des scores.
 
----
+src/cache_manager.py : Système de cache pour limiter les appels API et les coûts.
 
-## Fonctionnalités
+Dépannage
+Si la commande streamlit n'est pas trouvée : Vérifiez que votre environnement virtuel (venv) est bien activé.
 
-- Questionnaire hybride (texte libre + échelles)
-- Analyse sémantique avec SBERT (pas de coût API)
-- Recommandation des 3 meilleurs films
-- Graphiques interactifs (radar, barres...)
-- Profil cinéphile personnalisé
-- Plan de découverte pour explorer de nouveaux genres
-- Cache intelligent pour limiter les appels API Gemini
-
----
-
-## Quelques précisions techniques
-
-**Pourquoi SBERT ?** Parce que c'est super efficace pour comprendre le sens des phrases en français, et ça tourne en local (pas de coût).
-
-**Pourquoi Gemini ?** API gratuite, rapide, et ça génère du texte de qualité en français.
-
-**Pourquoi Streamlit ?** Parce que c'est hyper simple pour faire une interface web sans se prendre la tête avec du HTML/CSS/JS.
-
-**Le cache ?** Pour éviter de taper dans l'API Gemini à chaque fois (économie de quota gratuit).
-
----
-
-## Si vous avez des problèmes
-
-**L'app ne démarre pas ?**
-```bash
-streamlit run app.py --server.port 8502
-```
-
-**Erreur "Module not found" ?**
-```bash
-pip install -r requirements.txt
-```
-
-
-
----
-
-## Projet réalisé par
-
-- Youcef & Anthony
-- EFREI Paris 2025-26
-- Module IA Générative
-
-
-
-
+Si vous avez une erreur de clé API : Vérifiez que le fichier se nomme bien .env (et non .env.txt) et qu'il contient votre clé valide.

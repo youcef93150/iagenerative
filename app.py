@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 st.set_page_config(
     page_title="AISCA-Cinema | Recommandation Cinématographique IA",
-    page_icon="🎬",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -213,7 +213,7 @@ def main():
     initialize_session_state()
     
     # Header principal avec badge de projet
-    st.markdown('<h1 class="main-header">🎬 AISCA-Cinema</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">AISCA-Cinema</h1>', unsafe_allow_html=True)
     st.markdown(
         '<p class="sub-header">Agent Intelligent de Recommandation Cinématographique propulsé par IA</p>',
         unsafe_allow_html=True
@@ -222,13 +222,13 @@ def main():
     # Badge du projet en haut
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.info("🎓 **Projet EFREI 2025-26** | Module IA Générative | RNCP40875 - Bloc 2")
+        st.info("**Projet EFREI 2025-26** | Module IA Générative | RNCP40875 - Bloc 2")
     
     st.markdown("---")
     
     # Etape 1 - Affichage du questionnaire
     if not st.session_state.analysis_done:
-        st.markdown("## 📝 Questionnaire de Préférences")
+        st.markdown("## Questionnaire de Préférences")
         st.markdown("Répondez aux questions ci-dessous pour obtenir vos recommandations personnalisées.")
         
         questionnaire = QuestionnaireManager()
@@ -239,13 +239,13 @@ def main():
         # Bouton d'analyse centre
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            analyze_button = st.button("🎯 Analyser mes Préférences", type="primary", use_container_width=True)
+            analyze_button = st.button("Analyser mes Préférences", type="primary", use_container_width=True)
         
         # Bouton de reinitialisation si deja analyse
         if st.session_state.get('recommendations'):
             col1, col2, col3 = st.columns([1, 1, 1])
             with col2:
-                if st.button("🔄 Nouvelle Analyse", use_container_width=True):
+                if st.button("Nouvelle Analyse", use_container_width=True):
                     st.session_state.responses = None
                     st.session_state.recommendations = None
                     st.session_state.analysis_done = False
@@ -267,16 +267,16 @@ def main():
                 st.session_state.responses = responses
                 
                 # Lancer le processus d'analyse
-                with st.spinner("🔍 Analyse en cours... Veuillez patienter."):
+                with st.spinner("Analyse en cours... Veuillez patienter."):
                     try:
                         # Etape 1 - Initialiser les composants necessaires
-                        st.toast("🔧 Initialisation des composants...")
+                        st.toast("Initialisation des composants...")
                         nlp_engine = NLPEngine()
                         scoring_system = ScoringSystem(alpha=0.50, beta=0.30, gamma=0.20)
                         genai = GenAIIntegration()
                         
                         # Etape 2 - Charger la base de donnees de films
-                        st.toast("📚 Chargement du référentiel de films...")
+                        st.toast("Chargement du référentiel de films...")
                         csv_path = Path(__file__).parent / 'data' / 'films_referentiel.csv'
                         referentiel = nlp_engine.load_referentiel(str(csv_path))
                         
@@ -286,14 +286,14 @@ def main():
                         # Etape 4 - Enrichir le texte si trop court avec l'IA
                         user_text, was_enriched = genai.enrich_short_text(user_text, min_words=15)
                         if was_enriched:
-                            st.toast("✨ Description enrichie par l'IA")
+                            st.toast("Description enrichie par l'IA")
                         
                         # Etape 5 - Analyse semantique avec SBERT
-                        st.toast("🧠 Analyse sémantique avec SBERT...")
+                        st.toast("Analyse sémantique avec SBERT...")
                         recommendations, similarities = nlp_engine.analyze_user_input(user_text, top_n=3)
                         
                         # Etape 6 - Calculer les scores ponderes
-                        st.toast("🎯 Calcul des scores finaux...")
+                        st.toast("Calcul des scores finaux...")
                         genre_weights = questionnaire.get_genre_weights(responses)
                         mood_weights = questionnaire.get_mood_weights(responses)
                         
@@ -317,7 +317,7 @@ def main():
                         weak_genres = scoring_system.identify_weak_genres(similarities, referentiel, threshold=0.4)
                         
                         # Etape 9 - Generation avec l'IA Gemini
-                        st.toast("🤖 Génération du profil et du plan...")
+                        st.toast("Génération du profil et du plan...")
                         
                         # Generer le plan de decouverte avec 1 seul appel API
                         user_profile_summary = f"Genres préférés: {', '.join([g for g, w in sorted(genre_weights.items(), key=lambda x: x[1], reverse=True)[:3]])}. Moods: {', '.join([m for m, w in sorted(mood_weights.items(), key=lambda x: x[1], reverse=True)[:3]])}."
@@ -345,11 +345,11 @@ def main():
                         }
                         
                         st.session_state.analysis_done = True
-                        st.success("✅ Analyse terminée !")
+                        st.success("Analyse terminée !")
                         st.rerun()
                         
                     except Exception as e:
-                        st.error(f"❌ Erreur lors de l'analyse: {str(e)}")
+                        st.error(f"Erreur lors de l'analyse: {str(e)}")
                         logger.error(f"Erreur analyse: {e}", exc_info=True)
     
     # Etape 2 - Affichage des resultats
@@ -361,35 +361,35 @@ def main():
         # Bouton nouvelle analyse en haut
         col1, col2, col3 = st.columns([2, 1, 2])
         with col2:
-            if st.button("🔄 Nouvelle Analyse", use_container_width=True):
+            if st.button("Nouvelle Analyse", use_container_width=True):
                 st.session_state.responses = None
                 st.session_state.recommendations = None
                 st.session_state.analysis_done = False
                 st.rerun()
         
         st.markdown("---")
-        st.markdown("## 🎯 Vos Recommandations Personnalisées")
+        st.markdown("## Vos Recommandations Personnalisées")
         st.markdown("---")
         
         # Organiser les resultats en onglets
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
-            "🏆 Top 3 Films",
-            "📊 Visualisations",
-            "🎭 Profil Cinéphile",
-            "📚 Plan de Découverte",
-            "⚙️ Statistiques"
+            "Top 3 Films",
+            "Visualisations",
+            "Profil Cinéphile",
+            "Plan de Découverte",
+            "Statistiques"
         ])
         
         # Onglet 1 - Les 3 meilleurs films recommandes
         with tab1:
-            st.markdown("### 🏆 Vos 3 Films Recommandés")
+            st.markdown("### Vos 3 Films Recommandés")
             
             for film in results['top_3']:
                 viz.display_film_card(film, film['rang'])
         
         # Onglet 2 - Graphiques et visualisations
         with tab2:
-            st.markdown("### 📊 Analyse Visuelle de votre Profil")
+            st.markdown("### Analyse Visuelle de votre Profil")
             
             col1, col2 = st.columns(2)
             
@@ -403,12 +403,12 @@ def main():
             
             viz.plot_genre_distribution(results['genre_distribution'])
             
-            st.markdown("### 📈 Statistiques de Couverture")
+            st.markdown("### Statistiques de Couverture")
             viz.display_coverage_stats(results['coverage_stats'])
         
         # Onglet 3 - Profil personnalise genere par l'IA
         with tab3:
-            st.markdown("### 🎭 Votre Profil Cinéphile")
+            st.markdown("### Votre Profil Cinéphile")
             st.info("Généré par l'IA Gemini (1 appel API - EF4.3)")
             
             st.markdown(results['cinephile_profile'])
@@ -418,21 +418,21 @@ def main():
             
             # Interpreter le score pour l'utilisateur
             if results['coverage_score'] >= 0.7:
-                st.success("🌟 Excellent ! Vos goûts sont très bien définis.")
+                st.success("Excellent ! Vos goûts sont très bien définis.")
             elif results['coverage_score'] >= 0.5:
-                st.info("👍 Bon profil cinématographique avec de la diversité.")
+                st.info("Bon profil cinématographique avec de la diversité.")
             else:
-                st.warning("🔍 Profil varié ! Vous êtes ouvert à de nombreux styles.")
+                st.warning("Profil varié ! Vous êtes ouvert à de nombreux styles.")
         
         # Onglet 4 - Plan de decouverte personnalise
         with tab4:
-            st.markdown("### 📚 Plan de Découverte Personnalisé")
+            st.markdown("### Plan de Découverte Personnalisé")
             st.info("Généré par l'IA Gemini (1 appel API - EF4.2)")
             
             st.markdown(results['discovery_plan'])
             
             if results['weak_genres']:
-                st.markdown("### 🎬 Genres à Explorer")
+                st.markdown("### Genres à Explorer")
                 cols = st.columns(len(results['weak_genres'][:5]))
                 for idx, genre in enumerate(results['weak_genres'][:5]):
                     with cols[idx]:
@@ -440,9 +440,9 @@ def main():
         
         # Onglet 5 - Details techniques et statistiques
         with tab5:
-            st.markdown("### ⚙️ Détails Techniques de l'Analyse")
+            st.markdown("### Détails Techniques de l'Analyse")
             
-            st.markdown("#### 🧠 Analyse Sémantique (SBERT)")
+            st.markdown("#### Analyse Sémantique (SBERT)")
             st.json({
                 "Modèle": "paraphrase-multilingual-MiniLM-L12-v2",
                 "Type": "Sentence-BERT (Embeddings Contextuels)",
@@ -450,7 +450,7 @@ def main():
                 "Films analysés": results['coverage_stats']['total_films']
             })
             
-            st.markdown("#### 🎯 Système de Scoring")
+            st.markdown("#### Système de Scoring")
             st.code("""
 Formule de Score Final:
 Score = 0.50 × Similarité_Sémantique 
@@ -460,10 +460,10 @@ Score = 0.50 × Similarité_Sémantique
 Où tous les scores sont normalisés dans [0, 1]
             """)
             
-            st.markdown("#### 🤖 Utilisation de l'IA Générative")
+            st.markdown("#### Utilisation de l'IA Générative")
             viz.display_api_usage(results['api_stats'])
             
-            st.markdown("#### 📊 Données Brutes")
+            st.markdown("#### Données Brutes")
             with st.expander("Voir les scores détaillés"):
                 import pandas as pd
                 df_scores = pd.DataFrame([
@@ -485,7 +485,7 @@ Où tous les scores sont normalisés dans [0, 1]
         """
         <div style='text-align: center; color: #64748b; padding: 2rem 0;'>
             <p style='font-size: 0.9rem; margin-bottom: 0.5rem;'>
-                🎬 <strong style='background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>AISCA-Cinema</strong> | Recommandation Cinématographique Intelligente
+                <strong style='background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>AISCA-Cinema</strong> | Recommandation Cinématographique Intelligente
             </p>
             <p style='font-size: 0.85rem; color: #475569;'>
                 Projet EFREI 2025-26 • Architecture RAG • SBERT + Gemini AI

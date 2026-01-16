@@ -223,7 +223,7 @@ class ScoringSystem:
         
         logger.info(f" Scores calculés et films reclassés")
         top_scores = [f"{r['score_final']:.3f}" for r in enriched_recs[:3]]
-        logger.info(f"🏆 Top 3 scores finaux: {top_scores}")
+        logger.info(f" Top 3 scores finaux: {top_scores}")
         
         return enriched_recs
     
