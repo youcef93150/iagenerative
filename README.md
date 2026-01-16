@@ -1,360 +1,152 @@
-# 🎬 Agent Intelligent de Recommandation Cinématographique (AISCA-Cinema)
+# 🎬 Agent de Recommandation Cinéma
 
-## 📋 Description du Projet
+**Projet EFREI - IA Générative 2025-26**
 
-**Système de recommandation de films basé sur l'analyse sémantique avec SBERT et l'IA générative (Gemini).**
-
-Adaptation de l'architecture AISCA (Agent Intelligent Sémantique et Génératif pour la Cartographie des Compétences) appliquée au domaine cinématographique.
-
-**Projet EFREI - IA Générative 2025-26 - RNCP40875 Bloc 2**
+Un système intelligent qui recommande des films en fonction de vos goûts, basé sur SBERT et l'IA Gemini.
 
 ---
 
-## 🎯 Objectifs du Projet
+## C'est quoi ce projet ?
 
-### Objectif Principal
-Développer un agent RAG (Retrieval-Augmented Generation) capable de :
-- Analyser sémantiquement les préférences cinématographiques d'un utilisateur
-- Recommander les 3 films les plus pertinents via similarité cosinus (SBERT)
-- Générer des justifications personnalisées via IA générative (Gemini)
-- Proposer un profil cinéphile et un plan de découverte
+En gros, c'est une app qui pose des questions sur vos préférences ciné (genres, ambiances, ce que vous cherchez...) et qui utilise l'IA pour proposer 3 films qui devraient vraiment vous plaire. 
 
-### Architecture RAG Appliquée
-1. **Retrieval** : Extraction des films pertinents via embeddings SBERT
-2. **Augmented Context** : Construction d'un contexte enrichi avec scores sémantiques
-3. **Generation** : Production de recommandations personnalisées via Gemini
+L'app analyse ce que vous dites avec du NLP (traitement du langage), compare ça avec une base de 260 films, et sort les meilleures recommandations avec des explications personnalisées générées par Gemini.
+
+**Architecture RAG** : on récupère les films pertinents avec SBERT (partie Retrieval), puis on génère des textes personnalisés avec Gemini (partie Generation).
 
 ---
 
-## 🏗️ Architecture Technique
+## Comment lancer l'app ?
 
-```
-cinema-recommendation-agent/
-├── README.md                       # Documentation
-├── requirements.txt                # Dependances Python
-├── .env.example                    # Template configuration API
-├── .gitignore                      # Fichiers a ignorer
-├── app.py                          # Interface Streamlit principale
-├── data/
-│   └── films_referentiel.csv       # Base de donnees 260 films reels
-├── src/
-│   ├── __init__.py
-│   ├── questionnaire.py            # Questionnaire hybride
-│   ├── nlp_engine.py               # Moteur NLP SBERT
-│   ├── scoring.py                  # Systeme de scoring
-│   ├── genai_integration.py        # Integration Gemini AI
-│   ├── visualization.py            # Graphiques et visualisations
-│   └── cache_manager.py            # Cache pour limiter couts API
-└── .cache/                         # Cache local GenAI
-```
+### Installation rapide
 
----
-
-## 🚀 Installation et Lancement
-
-### Prérequis
-- Python 3.9+
-- pip
-- Compte Google AI (pour Gemini API - gratuit)
-
-### 1. Cloner le projet
 ```bash
+# 1. Clonez le projet (ou téléchargez-le)
 cd /Users/youcef/Downloads/cinema-recommendation-agent
-```
 
-### 2. Créer un environnement virtuel
-```bash
+# 2. Créez un environnement virtuel
 python3 -m venv venv
-source venv/bin/activate  # macOS/Linux
-```
+source venv/bin/activate
 
-### 3. Installer les dépendances
-```bash
+# 3. Installez les dépendances
 pip install -r requirements.txt
-```
 
-### 4. Configuration de l'API Gemini
-1. Obtenir une clé API gratuite : https://makersuite.google.com/app/apikey
-2. Copier `.env.example` vers `.env` :
-   ```bash
-   cp .env.example .env
-   ```
-3. Éditer `.env` et ajouter votre clé :
-   ```
-   GEMINI_API_KEY=votre_clé_api_ici
-   ```
+# 4. Configurez votre clé API Gemini
+cp .env.example .env
+# Éditez le fichier .env et mettez votre clé API (gratuite sur https://makersuite.google.com/app/apikey)
 
-### 5. Lancer l'application
-```bash
+# 5. Lancez l'app
 streamlit run app.py
 ```
 
-L'application s'ouvre automatiquement à : `http://localhost:8501`
+L'app s'ouvre automatiquement sur `http://localhost:8501`
 
 ---
 
-## 📊 Exigences Fonctionnelles Implémentées
+## Comment ça marche ?
 
-### ✅ EF1 : Acquisition de la Donnée
+### Le questionnaire
+Vous remplissez un questionnaire avec :
+- Une description libre de ce que vous cherchez (minimum 20 caractères)
+- Vos préférences pour 10 genres de films (échelle de 1 à 5)
+- Vos préférences pour 8 ambiances différentes (échelle de 1 à 5)
+- Période préférée, réalisateurs favoris, films de référence...
 
-**EF1.1 - Questionnaire Hybride**
-- ✅ Description libre du film souhaité (texte libre, min. 20 caractères)
-- ✅ Auto-déclaration par genre (Likert 1-5) : 10 genres
-- ✅ Auto-déclaration d'ambiance/mood (Likert 1-5) : 8 moods
-- ✅ Questions guidées : période, réalisateurs favoris, films références
-- ✅ Éléments à éviter (optionnel)
+### L'analyse sémantique
+L'app utilise SBERT (un modèle NLP ultra performant) pour comprendre ce que vous voulez vraiment. Ça transforme votre texte en vecteurs et calcule la similarité avec les 260 films de la base.
 
-**EF1.2 - Structuration**
-- ✅ Stockage JSON structuré (`data/user_responses.json`)
-- ✅ Format timestamp pour traçabilité
+### Le scoring
+Chaque film reçoit un score basé sur :
+- **50%** : similarité sémantique (ce que vous avez écrit)
+- **30%** : vos préférences de genres
+- **20%** : vos préférences d'ambiance
 
-### ✅ EF2 : Moteur NLP Sémantique (Coût Zéro)
-
-**EF2.1 - Référentiel Cinématographique**
-- ✅ 55 films structurés en 10 blocs de genres
-- ✅ Catégories : Science-Fiction, Drame, Fantasy, Animation, Thriller, Comédie, Horreur, Romance, Action, Biopic
-- ✅ Champs : Description narrative, Keywords, Mood, Genre, Réalisateur, Année
-
-**EF2.2 - Modélisation Sémantique**
-- ✅ SBERT : `paraphrase-multilingual-MiniLM-L12-v2` (support français)
-- ✅ Embeddings contextuels locaux (pas d'appel API)
-- ✅ Cache des embeddings pour performance
-
-**EF2.3 - Mesure de Similarité**
-- ✅ Calcul de similarité cosinus
-- ✅ Scores normalisés [0, 1]
-
-### ✅ EF3 : Scoring et Recommandation
-
-**EF3.1 - Formule de Score Pondérée**
-```
-Score_Final = α × Score_Sémantique + β × Score_Genres + γ × Score_Moods
-
-Avec pondérations ajustables :
-- α = 0.50 (priorité à la description libre)
-- β = 0.30 (genres déclarés)
-- γ = 0.20 (ambiance/mood)
-```
-
-**EF3.2 - Recommandation Top 3**
-- ✅ Classement des films par score décroissant
-- ✅ Affichage des 3 meilleures recommandations
-- ✅ Détails complets pour chaque film
-
-### ✅ EF4 : Augmentation par GenAI (Gemini - Limitée)
-
-**EF4.1 - Augmentation de saisie (OPTIONNEL)**
-- ✅ Enrichissement automatique si description < 15 mots
-- ✅ Appel conditionnel uniquement
-- ✅ Cache pour éviter appels répétés
-
-**EF4.2 - Génération du Plan de Découverte**
-- ✅ Identification des genres/moods faiblement couverts
-- ✅ Suggestions de films à découvrir
-- ✅ **UN SEUL appel API** pour tout le plan
-
-**EF4.3 - Synthèse de Profil Cinéphile**
-- ✅ Bio personnalisée style "executive summary"
-- ✅ **UN SEUL appel API**
-- ✅ Basée sur les recommandations et préférences
-
-**Contraintes GenAI Respectées**
-- ✅ Appels API strictement limités (3 max par session)
-- ✅ Caching automatique (fichier `.cache/genai_cache.json`)
-- ✅ Gestion du quota Free Tier
+### Les recommandations
+L'app sort les 3 meilleurs films avec :
+- Des explications personnalisées (générées par Gemini)
+- Des graphiques de vos préférences
+- Un profil cinéphile personnalisé
+- Des suggestions pour découvrir de nouveaux genres
 
 ---
 
-## 🎨 Fonctionnalités Interface
+## Technologies utilisées
 
-### Visualisations Interactives
-1. **Graphique Radar** : Préférences par genre (10 axes)
-2. **Graphique Radar** : Ambiance/Mood (8 axes)
-3. **Barres** : Scores de similarité Top 3
-4. **Cartes de Films** : Détails visuels des recommandations
-5. **Distribution des Genres** : Affinité sémantique globale
-
-### Sections de l'Application
-1. 🎬 **Questionnaire** : Collecte des préférences
-2. 🔍 **Analyse Sémantique** : Traitement SBERT
-3. 🎯 **Recommandations** : Top 3 + justifications
-4. 📊 **Visualisations** : Graphiques interactifs
-5. 🎭 **Profil Cinéphile** : Bio personnalisée
-6. 📚 **Plan de Découverte** : Suggestions d'exploration
+- **Python 3.9+** : langage principal
+- **Streamlit** : interface web interactive
+- **SentenceTransformers** : embeddings SBERT pour l'analyse sémantique
+- **Google Gemini** : IA générative pour les textes personnalisés
+- **Plotly** : graphiques interactifs
+- **Pandas** : manipulation des données
 
 ---
 
-## 🧪 Technologies Utilisées
+## Structure du projet
 
-| Technologie | Usage | Version |
-|------------|-------|---------|
-| **Python** | Langage principal | 3.9+ |
-| **Streamlit** | Interface web | 1.31.0 |
-| **SentenceTransformers** | Embeddings SBERT | 2.3.1 |
-| **Google Gemini** | IA générative | API v0.3.2 |
-| **Pandas** | Manipulation données | 2.2.0 |
-| **Plotly** | Visualisations | 5.18.0 |
-| **scikit-learn** | Similarité cosinus | 1.4.0 |
-| **python-dotenv** | Gestion .env | 1.0.1 |
-
----
-
-## 📐 Formule de Scoring Détaillée
-
-### 1. Score Sémantique (SBERT)
-```python
-Similarité_Cosinus(Embedding_User, Embedding_Film) → [0, 1]
 ```
-
-### 2. Score Genres
-```python
-Score_Genre = moyenne([Préférence_Likert(g) / 5 for g in genres_film])
-```
-
-### 3. Score Moods
-```python
-Score_Mood = moyenne([Préférence_Likert(m) / 5 for m in moods_film])
-```
-
-### 4. Score Final Pondéré
-```python
-Score_Final = 0.50 × Sim_Cosinus + 0.30 × Score_Genre + 0.20 × Score_Mood
+cinema-recommendation-agent/
+├── app.py                      # App Streamlit principale
+├── requirements.txt            # Dépendances Python
+├── .env.example               # Template config API
+├── data/
+│   └── films_referentiel.csv  # Base de 260 films
+└── src/
+    ├── questionnaire.py       # Interface de questionnaire
+    ├── nlp_engine.py          # Moteur SBERT
+    ├── scoring.py             # Calcul des scores
+    ├── genai_integration.py   # Intégration Gemini
+    ├── visualization.py       # Graphiques
+    └── cache_manager.py       # Gestion du cache API
 ```
 
 ---
 
-## 📂 Référentiel de Films
+## Fonctionnalités
 
-### Structure du Référentiel
-| Colonne | Description | Exemple |
-|---------|-------------|---------|
-| FilmID | Identifiant unique | F001 |
-| BlockID | Bloc de genre | B01 |
-| Categorie | Genre principal | Science-Fiction |
-| Film | Titre du film | Inception |
-| Realisateur | Réalisateur | Christopher Nolan |
-| Annee | Année de sortie | 2010 |
-| Description | Synopsis narratif riche | "Un voleur qui s'introduit..." |
-| Keywords | Mots-clés sémantiques | "rêves, réalité, heist" |
-| Mood | Ambiance/Atmosphère | "mind-bending, intense" |
-| Genre | Genres (multi) | "Science-Fiction, Thriller" |
-
-### Statistiques
-- **Total films** : 55
-- **Blocs de genres** : 10
-- **Période couverte** : 1980-2024
-- **Réalisateurs** : 40+
+- Questionnaire hybride (texte libre + échelles)
+- Analyse sémantique avec SBERT (pas de coût API)
+- Recommandation des 3 meilleurs films
+- Graphiques interactifs (radar, barres...)
+- Profil cinéphile personnalisé
+- Plan de découverte pour explorer de nouveaux genres
+- Cache intelligent pour limiter les appels API Gemini
 
 ---
 
-## 🔬 Compétences RNCP40875 - Bloc 2 Validées
+## Quelques précisions techniques
 
-### Compétences Principales
-- ✅ Collecter et préparer données non structurées (texte libre)
-- ✅ Concevoir et implémenter modèles NLP (SBERT)
-- ✅ Prototyper solution IA (RAG, embeddings, GenAI)
-- ✅ Développer pipeline data bout en bout
-- ✅ Optimiser coûts (cache, API limitée)
-- ✅ Documenter solution technique
+**Pourquoi SBERT ?** Parce que c'est super efficace pour comprendre le sens des phrases en français, et ça tourne en local (pas de coût).
 
-### Compétences Techniques Mobilisées
-- **NLP** : Embeddings contextuels, similarité cosinus
-- **IA Générative** : Prompt engineering, RAG, caching
-- **Data Engineering** : Pipeline structuré, versioning Git
-- **Software** : Interface Streamlit, visualisations
-- **Professionnelles** : MVP, documentation, présentation
+**Pourquoi Gemini ?** API gratuite, rapide, et ça génère du texte de qualité en français.
+
+**Pourquoi Streamlit ?** Parce que c'est hyper simple pour faire une interface web sans se prendre la tête avec du HTML/CSS/JS.
+
+**Le cache ?** Pour éviter de taper dans l'API Gemini à chaque fois (économie de quota gratuit).
 
 ---
 
-## 🎓 Justification des Choix Techniques
+## Si vous avez des problèmes
 
-### Pourquoi SBERT ?
-- ✅ Embeddings contextuels multilingues (français)
-- ✅ Performance supérieure à Word2Vec/GloVe
-- ✅ Local (coût zéro)
-- ✅ Optimisé pour phrases/paragraphes
-
-### Pourquoi Gemini ?
-- ✅ API gratuite (Free Tier généreux)
-- ✅ Rapide (Flash 2.0)
-- ✅ Support français natif
-- ✅ Bonne qualité de génération
-
-### Pourquoi Streamlit ?
-- ✅ Prototypage rapide
-- ✅ Interface réactive native
-- ✅ Pas de frontend à coder
-- ✅ Déploiement facile
-
-### Pourquoi Architecture RAG ?
-- ✅ Réduit hallucinations GenAI
-- ✅ Contrôle total sur recommandations
-- ✅ Approche industrielle standard
-- ✅ Optimise coûts API
-
----
-
-## 📝 Livrables du Projet
-
-### À soumettre sur Moodle + GitHub
-1. ✅ Code source complet + documentation
-2. ✅ Référentiel de films (55+)
-3. ✅ README.md technique
-4. ✅ Présentation PowerPoint
-5. ✅ Démo vidéo (optionnel)
-
-### Présentation Finale
-- 📅 Date : Dernière séance du module
-- ⏱️ Durée : 15-20 minutes
-- 👥 Format : Tous les membres participent
-- 📊 Contenu : Démo live + explication technique
-
----
-
-## 🤝 Équipe
-
-- **Étudiant 1** : [Votre Nom]
-- **Étudiant 2** : [Nom Binôme]
-
----
-
-## 📄 Licence
-
-Projet académique - EFREI Paris 2025-26  
-Module : IA Générative - Data Engineering & AI
-
----
-
-## 🆘 Dépannage
-
-### Erreur : "Module not found"
-```bash
-pip install -r requirements.txt
-```
-
-### Erreur : "API key invalid"
-Vérifiez que votre clé Gemini est correcte dans `.env`
-
-### L'application ne démarre pas
+**L'app ne démarre pas ?**
 ```bash
 streamlit run app.py --server.port 8502
 ```
 
-### Cache trop volumineux
-```python
-# Dans l'app, section admin :
-st.button("Vider le cache GenAI")
+**Erreur "Module not found" ?**
+```bash
+pip install -r requirements.txt
 ```
 
----
 
-## 📚 Ressources
-
-- [Documentation Streamlit](https://docs.streamlit.io/)
-- [SentenceTransformers](https://www.sbert.net/)
-- [Google Gemini API](https://ai.google.dev/)
-- [Similarité Cosinus](https://en.wikipedia.org/wiki/Cosine_similarity)
 
 ---
 
-**🎬 Bon développement ! GOOD LUCK!**
+## Projet réalisé par
+
+- Youcef & Anthony
+- EFREI Paris 2025-26
+- Module IA Générative
+
+
+
+

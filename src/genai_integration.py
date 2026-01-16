@@ -35,7 +35,7 @@ class GenAIIntegration:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        model_name: str = "gemini-2.0-flash-exp",
+        model_name: str = None,
         cache_enabled: bool = True,
         max_cache_size: int = 100
     ):
@@ -48,8 +48,8 @@ class GenAIIntegration:
             cache_enabled: Active ou non le cache
             max_cache_size: Nombre max d'entrees dans le cache
         """
-        # Recuperer la cle API depuis l'environnement
-        self.api_key = api_key or os.getenv('GEMINI_API_KEY')
+        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        self.model_name = model_name or os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
         
         if not self.api_key:
             raise ValueError(
@@ -59,8 +59,7 @@ class GenAIIntegration:
         
         # Configurer l'API Gemini
         genai.configure(api_key=self.api_key)
-        self.model_name = model_name
-        self.model = genai.GenerativeModel(model_name)
+        self.model = genai.GenerativeModel(self.model_name)
         
         # Initialiser le systeme de cache
         self.cache = CacheManager(
